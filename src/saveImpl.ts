@@ -10,8 +10,8 @@ import * as utils from "./utils/actionUtils";
 // throw an uncaught exception.  Instead of failing this action, just warn.
 process.on("uncaughtException", e => utils.logWarning(e.message));
 
-async function saveImpl(stateProvider: IStateProvider): Promise<number | void> {
-    let cacheId = -1;
+async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
+    let cacheId = "";
     try {
         if (!utils.isCacheFeatureAvailable()) {
             return;
@@ -59,11 +59,10 @@ async function saveImpl(stateProvider: IStateProvider): Promise<number | void> {
         cacheId = await cache.saveCache(
             cachePaths,
             primaryKey,
-            { uploadChunkSize: utils.getInputAsInt(Inputs.UploadChunkSize) },
             enableCrossOsArchive
         );
 
-        if (cacheId != -1) {
+        if (cacheId != "") {
             core.info(`Cache saved with key: ${primaryKey}`);
         }
     } catch (error: unknown) {
