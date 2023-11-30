@@ -3026,7 +3026,7 @@ const axios_1 = __importDefault(__webpack_require__(346));
 const versionSalt = '1.0';
 function getCacheApiUrl(resource) {
     var _a;
-    const baseUrl = (_a = process.env['WARP_CACHE_URL']) !== null && _a !== void 0 ? _a : 'https://cache.warpbuild.com';
+    const baseUrl = (_a = process.env['WARPBUILD_CACHE_URL']) !== null && _a !== void 0 ? _a : 'https://cache.warpbuild.com';
     if (!baseUrl) {
         throw new Error('Cache Service Url not found, unable to restore cache.');
     }
@@ -3047,7 +3047,7 @@ function getRequestOptions() {
 }
 function createHttpClient() {
     var _a;
-    const token = (_a = process.env['WARP_RUNNER_VERIFICATION_TOKEN']) !== null && _a !== void 0 ? _a : '';
+    const token = (_a = process.env['WARPBUILD_RUNNER_VERIFICATION_TOKEN']) !== null && _a !== void 0 ? _a : '';
     const bearerCredentialHandler = new auth_1.BearerCredentialHandler(token);
     return new http_client_1.HttpClient('actions/cache', [bearerCredentialHandler], getRequestOptions());
 }
@@ -15893,7 +15893,7 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    return !!process.env['WARP_CACHE_URL'];
+    return !!process.env['WARPBUILD_CACHE_URL'];
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
