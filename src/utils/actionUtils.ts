@@ -19,6 +19,16 @@ export function isExactKeyMatch(key: string, cacheKey?: string): boolean {
     );
 }
 
+export function isCacheKeyInKey(key: string, cacheKey?: string): boolean {
+    if (!cacheKey) {
+        return false;
+    }
+
+    return Boolean(
+        key.toLocaleUpperCase().includes(cacheKey.toLocaleUpperCase())
+    );
+}
+
 export function logWarning(message: string): void {
     const warningPrefix = "[warning]";
     core.info(`${warningPrefix}${message}`);

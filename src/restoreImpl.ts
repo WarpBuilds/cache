@@ -76,7 +76,8 @@ export async function restoreImpl(
         // Store the matched cache key in states
         stateProvider.setState(State.CacheMatchedKey, cacheKey);
 
-        const isExactKeyMatch = utils.isExactKeyMatch(
+        // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
+        const isExactKeyMatch = utils.isCacheKeyInKey(
             core.getInput(Inputs.Key, { required: true }),
             cacheKey
         );
