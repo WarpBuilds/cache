@@ -12945,7 +12945,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isCacheFeatureAvailable = exports.getInputAsBool = exports.getInputAsInt = exports.getInputAsArray = exports.isValidEvent = exports.logWarning = exports.isCacheKeyInKey = exports.isExactKeyMatch = exports.isGhes = void 0;
+exports.isCacheFeatureAvailable = exports.getInputAsBool = exports.getInputAsInt = exports.getInputAsArray = exports.isValidEvent = exports.logWarning = exports.isKeyInCacheKey = exports.isExactKeyMatch = exports.isGhes = void 0;
 const cache = __importStar(__webpack_require__(692));
 const core = __importStar(__webpack_require__(470));
 const constants_1 = __webpack_require__(694);
@@ -12961,13 +12961,10 @@ function isExactKeyMatch(key, cacheKey) {
         }) === 0);
 }
 exports.isExactKeyMatch = isExactKeyMatch;
-function isCacheKeyInKey(key, cacheKey) {
-    if (!cacheKey) {
-        return false;
-    }
-    return Boolean(key.toLocaleUpperCase().includes(cacheKey.toLocaleUpperCase()));
+function isKeyInCacheKey(key, cacheKey) {
+    return Boolean(cacheKey === null || cacheKey === void 0 ? void 0 : cacheKey.toLocaleUpperCase().includes(key.toLocaleUpperCase()));
 }
-exports.isCacheKeyInKey = isCacheKeyInKey;
+exports.isKeyInCacheKey = isKeyInCacheKey;
 function logWarning(message) {
     const warningPrefix = "[warning]";
     core.info(`${warningPrefix}${message}`);
@@ -13455,7 +13452,7 @@ function saveImpl(stateProvider) {
             // If matched restore key is same as primary key, then do not save cache
             // NO-OP in case of SaveOnly action
             const restoredKey = stateProvider.getCacheState();
-            if (utils.isCacheKeyInKey(primaryKey, restoredKey)) {
+            if (utils.isKeyInCacheKey(primaryKey, restoredKey)) {
                 core.info(`Cache hit occurred on the primary key ${primaryKey}, not saving cache.`);
                 return;
             }

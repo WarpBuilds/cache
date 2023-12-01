@@ -12952,7 +12952,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.isCacheFeatureAvailable = exports.getInputAsBool = exports.getInputAsInt = exports.getInputAsArray = exports.isValidEvent = exports.logWarning = exports.isCacheKeyInKey = exports.isExactKeyMatch = exports.isGhes = void 0;
+exports.isCacheFeatureAvailable = exports.getInputAsBool = exports.getInputAsInt = exports.getInputAsArray = exports.isValidEvent = exports.logWarning = exports.isKeyInCacheKey = exports.isExactKeyMatch = exports.isGhes = void 0;
 const cache = __importStar(__webpack_require__(692));
 const core = __importStar(__webpack_require__(470));
 const constants_1 = __webpack_require__(694);
@@ -12968,13 +12968,10 @@ function isExactKeyMatch(key, cacheKey) {
         }) === 0);
 }
 exports.isExactKeyMatch = isExactKeyMatch;
-function isCacheKeyInKey(key, cacheKey) {
-    if (!cacheKey) {
-        return false;
-    }
-    return Boolean(key.toLocaleUpperCase().includes(cacheKey.toLocaleUpperCase()));
+function isKeyInCacheKey(key, cacheKey) {
+    return Boolean(cacheKey === null || cacheKey === void 0 ? void 0 : cacheKey.toLocaleUpperCase().includes(key.toLocaleUpperCase()));
 }
-exports.isCacheKeyInKey = isCacheKeyInKey;
+exports.isKeyInCacheKey = isKeyInCacheKey;
 function logWarning(message) {
     const warningPrefix = "[warning]";
     core.info(`${warningPrefix}${message}`);
@@ -16956,7 +16953,7 @@ function restoreImpl(stateProvider) {
             // Store the matched cache key in states
             stateProvider.setState(constants_1.State.CacheMatchedKey, cacheKey);
             // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
-            const isExactKeyMatch = utils.isCacheKeyInKey(core.getInput(constants_1.Inputs.Key, { required: true }), cacheKey);
+            const isExactKeyMatch = utils.isKeyInCacheKey(core.getInput(constants_1.Inputs.Key, { required: true }), cacheKey);
             core.setOutput(constants_1.Outputs.CacheHit, isExactKeyMatch.toString());
             if (lookupOnly) {
                 core.info(`Cache found and can be restored from key: ${cacheKey}`);

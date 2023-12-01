@@ -19,13 +19,9 @@ export function isExactKeyMatch(key: string, cacheKey?: string): boolean {
     );
 }
 
-export function isCacheKeyInKey(key: string, cacheKey?: string): boolean {
-    if (!cacheKey) {
-        return false;
-    }
-
+export function isKeyInCacheKey(key: string, cacheKey?: string): boolean {
     return Boolean(
-        key.toLocaleUpperCase().includes(cacheKey.toLocaleUpperCase())
+        cacheKey?.toLocaleUpperCase().includes(key.toLocaleUpperCase())
     );
 }
 

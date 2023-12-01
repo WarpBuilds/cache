@@ -48,7 +48,7 @@ async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
         // NO-OP in case of SaveOnly action
         const restoredKey = stateProvider.getCacheState();
 
-        if (utils.isCacheKeyInKey(primaryKey, restoredKey)) {
+        if (utils.isKeyInCacheKey(primaryKey, restoredKey)) {
             core.info(
                 `Cache hit occurred on the primary key ${primaryKey}, not saving cache.`
             );
