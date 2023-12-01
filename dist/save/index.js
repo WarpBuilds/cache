@@ -13432,6 +13432,11 @@ function saveImpl(stateProvider) {
                 utils.logWarning(`Event Validation Error: The event type ${process.env[constants_1.Events.Key]} is not supported because it's not tied to a branch or tag ref.`);
                 return;
             }
+            const deleteCache = utils.getInputAsBool(constants_1.Inputs.DeleteCache);
+            if (deleteCache) {
+                // If delete is specified, we don't need to save current cache.
+                return;
+            }
             // If restore has stored a primary key in state, reuse that
             // Else re-evaluate from inputs
             const primaryKey = stateProvider.getState(constants_1.State.CachePrimaryKey) ||
@@ -16204,7 +16209,8 @@ var Inputs;
     Inputs["UploadChunkSize"] = "upload-chunk-size";
     Inputs["EnableCrossOsArchive"] = "enableCrossOsArchive";
     Inputs["FailOnCacheMiss"] = "fail-on-cache-miss";
-    Inputs["LookupOnly"] = "lookup-only"; // Input for cache, restore action
+    Inputs["LookupOnly"] = "lookup-only";
+    Inputs["DeleteCache"] = "delete-cache"; // Input for cache, save action
 })(Inputs = exports.Inputs || (exports.Inputs = {}));
 var Outputs;
 (function (Outputs) {

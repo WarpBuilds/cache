@@ -41,6 +41,14 @@ export async function restoreImpl(
         const failOnCacheMiss = utils.getInputAsBool(Inputs.FailOnCacheMiss);
         const lookupOnly = utils.getInputAsBool(Inputs.LookupOnly);
 
+        const deleteCache = utils.getInputAsBool(Inputs.DeleteCache);
+
+        if (deleteCache) {
+            // Deletes cache and returns
+            await cache.deleteCache([primaryKey, ...restoreKeys]);
+            return;
+        }
+
         const cacheKey = await cache.restoreCache(
             cachePaths,
             primaryKey,

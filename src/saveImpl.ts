@@ -26,6 +26,13 @@ async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
             return;
         }
 
+        const deleteCache = utils.getInputAsBool(Inputs.DeleteCache);
+
+        if (deleteCache) {
+            // If delete is specified, we don't need to save current cache.
+            return;
+        }
+
         // If restore has stored a primary key in state, reuse that
         // Else re-evaluate from inputs
         const primaryKey =

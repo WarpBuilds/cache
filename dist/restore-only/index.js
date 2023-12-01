@@ -16100,7 +16100,8 @@ var Inputs;
     Inputs["UploadChunkSize"] = "upload-chunk-size";
     Inputs["EnableCrossOsArchive"] = "enableCrossOsArchive";
     Inputs["FailOnCacheMiss"] = "fail-on-cache-miss";
-    Inputs["LookupOnly"] = "lookup-only"; // Input for cache, restore action
+    Inputs["LookupOnly"] = "lookup-only";
+    Inputs["DeleteCache"] = "delete-cache"; // Input for cache, save action
 })(Inputs = exports.Inputs || (exports.Inputs = {}));
 var Outputs;
 (function (Outputs) {
@@ -16928,6 +16929,12 @@ function restoreImpl(stateProvider) {
             const enableCrossOsArchive = utils.getInputAsBool(constants_1.Inputs.EnableCrossOsArchive);
             const failOnCacheMiss = utils.getInputAsBool(constants_1.Inputs.FailOnCacheMiss);
             const lookupOnly = utils.getInputAsBool(constants_1.Inputs.LookupOnly);
+            const deleteCache = utils.getInputAsBool(constants_1.Inputs.DeleteCache);
+            if (deleteCache) {
+                // Deletes cache and returns
+                yield cache.deleteCache([primaryKey, ...restoreKeys]);
+                return;
+            }
             const cacheKey = yield cache.restoreCache(cachePaths, primaryKey, restoreKeys, { lookupOnly: lookupOnly }, enableCrossOsArchive);
             if (!cacheKey) {
                 if (failOnCacheMiss) {
