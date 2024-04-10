@@ -2,7 +2,11 @@ import * as cache from "@actions/cache";
 import * as core from "@actions/core";
 
 import { Events, Inputs, State } from "./constants";
-import { IStateProvider } from "./stateProvider";
+import {
+    IStateProvider,
+    NullStateProvider,
+    StateProvider
+} from "./stateProvider";
 import * as utils from "./utils/actionUtils";
 
 // Catch and log any unhandled exceptions.  These exceptions can leak out of the uploadChunk method in
@@ -78,4 +82,47 @@ async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
     return cacheId;
 }
 
-export default saveImpl;
+export async function saveOnlyRun(
+    earlyExit?: boolean | undefined
+): Promise<void> {
+    try {
+        const cacheId = await saveImpl(new NullStateProvider());
+        if (cacheId === "") {
+            core.warning(`Cache save failed.`);
+        }
+    } catch (err) {
+        console.error(err);
+        if (earlyExit) {
+            process.exit(1);
+        }
+    }
+
+    // node will stay alive if any promises are not resolved,
+    // which is a possibility if HTTP requests are dangling
+    // due to retries or timeouts. We know that if we got here
+    // that all promises that we care about have successfully
+    // resolved, so simply exit with success.
+    if (earlyExit) {
+        process.exit(0);
+    }
+}
+
+export async function saveRun(earlyExit?: boolean | undefined): Promise<void> {
+    try {
+        await saveImpl(new StateProvider());
+    } catch (err) {
+        console.error(err);
+        if (earlyExit) {
+            process.exit(1);
+        }
+    }
+
+    // node will stay alive if any promises are not resolved,
+    // which is a possibility if HTTP requests are dangling
+    // due to retries or timeouts. We know that if we got here
+    // that all promises that we care about have successfully
+    // resolved, so simply exit with success.
+    if (earlyExit) {
+        process.exit(0);
+    }
+}
