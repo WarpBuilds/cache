@@ -1,0 +1,47 @@
+name: Performance Test WarpCache
+
+on:
+  push:
+    branches:
+      - main
+      - prajjwal-warp-245
+
+env:
+  WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
+
+jobs:
+  perf-test:
+    strategy:
+      matrix:
+        os: [warpdev-ubuntu-latest-x64-4x]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Create a temp directory
+      run: mkdir -p temp && mkdir -p temp/temp1 && mkdir -p temp/temp2 && mkdir -p temp/temp3
+    - name: Create temp2 directory
+      run: mkdir -p temp2/temp3
+    # - name: Generate 100MB data from urandom
+    #   run: dd if=/dev/urandom of=temp/temp1/100MB bs=1M count=100
+    # - name: Generate 50MB data from urandom
+    #   run: dd if=/dev/urandom of=temp/temp3/50MB bs=1M count=50
+    - name: WarpCache
+      if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
+      uses: WarpBuilds/cache@v1.1.2-beta
+      with:
+        path: |
+          temp/temp1
+          temp/temp3
+        key: test-multiple-path-3
+        enableCrossOsArchive: false
+        enableCrossArchArchive: true
+    - name: Verify correct files
+      run: tree temp && ls -alh temp
+
+    - name: Cache
+      if: matrix.os == 'ubuntu-latest'
+      uses: actions/cache@v4.0.2
+      with:
+        path: temp/
+        key: test-1GB

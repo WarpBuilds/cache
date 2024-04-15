@@ -14,6 +14,7 @@ interface CacheInput {
     key: string;
     restoreKeys?: string[];
     enableCrossOsArchive?: boolean;
+    enableCrossArchArchive?: boolean;
     failOnCacheMiss?: boolean;
     lookupOnly?: boolean;
 }

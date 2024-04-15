@@ -1,4 +1,4 @@
-# Cache action
+# WarpCache Action
 
 This action allows caching dependencies and build outputs to improve workflow execution time.
 
@@ -56,6 +56,7 @@ If you are using a `self-hosted` Windows runner, `GNU tar` and `zstd` are requir
 * `path` - A list of files, directories, and wildcard patterns to cache and restore. See [`@actions/glob`](https://github.com/actions/toolkit/tree/main/packages/glob) for supported patterns.
 * `restore-keys` - An ordered list of prefix-matched keys to use for restoring stale cache if no cache hit occurred for key.
 * `enableCrossOsArchive` - An optional boolean when enabled, allows Windows runners to save or restore caches that can be restored or saved respectively on other platforms. Default: `false`
+* `enableCrossArchArchive` - An optional boolean when enabled, allows runners to save or restore caches that can be restored or saved respectively on runners of other architectures. Default: `false`
 * `fail-on-cache-miss` - Fail the workflow if cache entry is not found. Default: `false`
 * `lookup-only` - If true, only checks if cache entry exists and skips download. Does not change save cache behavior. Default: `false`
 
@@ -219,7 +220,7 @@ See [Using contexts to create cache keys](https://help.github.com/en/actions/con
 
 ## Cache Limits
 
-A repository can have up to 10GB of caches. Once the 10GB limit is reached, older caches will be evicted based on when the cache was last accessed.  Caches that are not accessed within the last week will also be evicted.
+There is no enforced cache limit on WarpCache.
 
 ## Skipping steps based on cache-hit
 

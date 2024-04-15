@@ -39,6 +39,9 @@ export async function restoreImpl(
         const enableCrossOsArchive = utils.getInputAsBool(
             Inputs.EnableCrossOsArchive
         );
+        const enableCrossArchArchive = utils.getInputAsBool(
+            Inputs.EnableCrossArchArchive
+        );
         const failOnCacheMiss = utils.getInputAsBool(Inputs.FailOnCacheMiss);
         const lookupOnly = utils.getInputAsBool(Inputs.LookupOnly);
 
@@ -46,7 +49,12 @@ export async function restoreImpl(
 
         if (deleteCache) {
             // Deletes cache and returns
-            await cache.deleteCache([primaryKey, ...restoreKeys]);
+            await cache.deleteCache(
+                cachePaths,
+                primaryKey,
+                enableCrossOsArchive,
+                enableCrossArchArchive
+            );
             return;
         }
 
@@ -55,7 +63,8 @@ export async function restoreImpl(
             primaryKey,
             restoreKeys,
             { lookupOnly: lookupOnly },
-            enableCrossOsArchive
+            enableCrossOsArchive,
+            enableCrossArchArchive
         );
 
         if (!cacheKey) {
