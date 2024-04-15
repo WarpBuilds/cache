@@ -24,7 +24,7 @@ jobs:
       run: dd if=/dev/urandom of=temp/5GB bs=1M count=5000
     - name: WarpCache
       if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
-      uses: WarpBuilds/cache@v1.0.3-beta
+      uses: WarpBuilds/cache@v1.0.5-beta
       with:
         path: temp/
         key: test-5GB
