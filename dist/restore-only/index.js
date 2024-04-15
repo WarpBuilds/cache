@@ -137,7 +137,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    yield cacheHttpClient.downloadCache((_b = cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url, archivePath);
+                    yield cacheHttpClient.downloadCache(cacheEntry.provider, (_b = cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url, archivePath);
                     if (core.isDebug()) {
                         yield (0, tar_1.listTar)(archivePath, compressionMethod);
                     }
@@ -156,13 +156,24 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
                     const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
-                    const readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_j = (_h = (_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.short_lived_token) === null || _h === void 0 ? void 0 : _h.access_token) !== null && _j !== void 0 ? _j : '');
-                    if (!readStream) {
-                        return undefined;
+                    yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_j = (_h = (_g = cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.short_lived_token) === null || _h === void 0 ? void 0 : _h.access_token) !== null && _j !== void 0 ? _j : '');
+                    if (core.isDebug()) {
+                        yield (0, tar_1.listTar)(archivePath, compressionMethod);
                     }
-                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod);
+                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+                    core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+                    yield (0, tar_1.extractTar)(archivePath, compressionMethod);
+                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
+                    // const readStream = cacheHttpClient.downloadCacheStreaming(
+                    //   'gcs',
+                    //   archiveLocation,
+                    //   cacheEntry?.gcs?.short_lived_token?.access_token ?? ''
+                    // )
+                    // if (!readStream) {
+                    //   return undefined
+                    // }
+                    // await extractStreamingTar(readStream, archivePath, compressionMethod)
                     core.info('Cache restored successfully');
                     break;
                 }
@@ -470,9 +481,25 @@ async function printCachesListForDiagnostics(
   }
 }
 */
-function downloadCache(archiveLocation, archivePath) {
+function downloadCache(provider, archiveLocation, archivePath, gcsToken) {
     return __awaiter(this, void 0, void 0, function* () {
-        yield (0, downloadUtils_1.downloadCacheMultiConnection)(archiveLocation, archivePath, 8);
+        switch (provider) {
+            case 's3':
+                yield (0, downloadUtils_1.downloadCacheMultiConnection)(archiveLocation, archivePath, 8);
+                break;
+            case 'gcs': {
+                if (!gcsToken) {
+                    throw new Error('Unable to download cache from GCS. GCP token is not provided.');
+                }
+                const oauth2Client = new google_auth_library_1.OAuth2Client();
+                oauth2Client.setCredentials({ access_token: gcsToken });
+                const storage = new storage_1.Storage({
+                    authClient: oauth2Client
+                });
+                yield (0, downloadUtils_1.downloadCacheMultipartGCP)(storage, archiveLocation, archivePath);
+                break;
+            }
+        }
     });
 }
 exports.downloadCache = downloadCache;
@@ -922,7 +949,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadCacheStreamingGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
+exports.downloadCacheStreamingGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const fs = __importStar(__nccwpck_require__(7147));
@@ -931,6 +958,7 @@ const util = __importStar(__nccwpck_require__(3837));
 const utils = __importStar(__nccwpck_require__(1518));
 const constants_1 = __nccwpck_require__(8840);
 const requestUtils_1 = __nccwpck_require__(3981);
+const storage_1 = __nccwpck_require__(7577);
 /**
  * Pipes the body of a HTTP response to a stream
  *
@@ -1146,6 +1174,28 @@ function downloadCacheMultiConnection(archiveLocation, archivePath, connections)
     });
 }
 exports.downloadCacheMultiConnection = downloadCacheMultiConnection;
+/**
+ * Download cache in multipart using the Gcloud SDK
+ *
+ * @param archiveLocation the URL for the cache
+ */
+function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
+            const transferManager = new storage_1.TransferManager(storage.bucket(bucketName));
+            yield transferManager.downloadFileInChunks(objectName, {
+                destination: archivePath
+            });
+        }
+        catch (error) {
+            core.debug(`Failed to download cache: ${error}`);
+            core.error(`Failed to download cache.`);
+            throw error;
+        }
+    });
+}
+exports.downloadCacheMultipartGCP = downloadCacheMultipartGCP;
 /**
  * Download the cache to a provider writable stream using GCloud SDK
  *
