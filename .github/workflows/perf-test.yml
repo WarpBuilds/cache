@@ -15,23 +15,23 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v3
+    - name: Create a temp directory
+      run: mkdir -p temp
+    - name: Generate 100MB data from urandom
+      run: dd if=/dev/urandom of=temp/100MB bs=1M count=100
     - name: WarpCache
       uses: WarpBuilds/cache@v1.0.2-beta
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+        path: temp/
+        key: test-100MB
     - name: Cache
       uses: actions/cache@v4.0.2
       with:
-        path: ~/.npm
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-        restore-keys: |
-          ${{ runner.os }}-node-
+        path: temp/
+        key: test-100MB
 
-    - run: npm ci
-    - name: Prettier Format Check
-      run: npm run format-check
-    - name: ESLint Check
-      run: npm run lint
+    # - run: npm ci
+    # - name: Prettier Format Check
+    #   run: npm run format-check
+    # - name: ESLint Check
+    #   run: npm run lint
