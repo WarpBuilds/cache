@@ -46,6 +46,7 @@ const utils = __importStar(__nccwpck_require__(1518));
 const cacheHttpClient = __importStar(__nccwpck_require__(8245));
 const tar_1 = __nccwpck_require__(6490);
 const options_1 = __nccwpck_require__(6215);
+const requestUtils_1 = __nccwpck_require__(3981);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -234,7 +235,7 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             const maxChunkSize = (_a = uploadOptions === null || uploadOptions === void 0 ? void 0 : uploadOptions.uploadChunkSize) !== null && _a !== void 0 ? _a : 32 * 1024 * 1024; // Default 32MB
             const numberOfChunks = Math.floor(archiveFileSize / maxChunkSize);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
-            if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400) {
+            if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
                 throw new Error((_c = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _b === void 0 ? void 0 : _b.message) !== null && _c !== void 0 ? _c : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
             }
             switch ((_d = reserveCacheResponse.result) === null || _d === void 0 ? void 0 : _d.provider) {
@@ -347,6 +348,7 @@ const downloadUtils_1 = __nccwpck_require__(5500);
 const requestUtils_1 = __nccwpck_require__(3981);
 const storage_1 = __nccwpck_require__(7577);
 const uploadUtils_1 = __nccwpck_require__(1786);
+const google_auth_library_1 = __nccwpck_require__(810);
 const versionSalt = '1.0';
 function getCacheApiUrl(resource) {
     var _a;
@@ -476,8 +478,10 @@ function downloadCacheStreaming(provider, archiveLocation, gcsToken) {
             if (!gcsToken) {
                 throw new Error('Unable to download cache from GCS. GCP token is not provided.');
             }
+            const oauth2Client = new google_auth_library_1.OAuth2Client();
+            oauth2Client.setCredentials({ access_token: gcsToken });
             const storage = new storage_1.Storage({
-                token: gcsToken
+                authClient: oauth2Client
             });
             return (0, downloadUtils_1.downloadCacheStreamingGCP)(storage, archiveLocation);
         }
@@ -562,8 +566,10 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                     throw new Error('Unable to upload cache to GCS. One of the following required parameters is missing: GCSBucketName, GCSObjectName, GCSAuthToken.');
                 }
                 core.debug('Uploading cache');
+                const oauth2Client = new google_auth_library_1.OAuth2Client();
+                oauth2Client.setCredentials({ access_token: GCSAuthToken });
                 const storage = new storage_1.Storage({
-                    token: GCSAuthToken
+                    authClient: oauth2Client
                 });
                 yield (0, uploadUtils_1.multiPartUploadToGCS)(storage, archivePath, GCSBucketName, GCSObjectName);
                 core.debug('Committing cache');
