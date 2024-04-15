@@ -409,6 +409,20 @@ function getVCSRef() {
     const vcsBranch = (_a = process.env['GITHUB_REF']) !== null && _a !== void 0 ? _a : '';
     return vcsBranch;
 }
+function getAnnotations() {
+    var _a, _b, _c, _d, _e, _f, _g, _h;
+    const annotations = {
+        GITHUB_WORKFLOW: (_a = process.env['GITHUB_WORKFLOW']) !== null && _a !== void 0 ? _a : '',
+        GITHUB_RUN_ID: (_b = process.env['GITHUB_RUN_ID']) !== null && _b !== void 0 ? _b : '',
+        GITHUB_RUN_ATTEMPT: (_c = process.env['GITHUB_RUN_ATTEMPT']) !== null && _c !== void 0 ? _c : '',
+        GITHUB_JOB: (_d = process.env['GITHUB_JOB']) !== null && _d !== void 0 ? _d : '',
+        GITHUB_REPOSITORY: (_e = process.env['GITHUB_REPOSITORY']) !== null && _e !== void 0 ? _e : '',
+        GITHUB_REF: (_f = process.env['GITHUB_REF']) !== null && _f !== void 0 ? _f : '',
+        GITHUB_ACTION: (_g = process.env['GITHUB_ACTION']) !== null && _g !== void 0 ? _g : '',
+        RUNNER_NAME: (_h = process.env['RUNNER_NAME']) !== null && _h !== void 0 ? _h : ''
+    };
+    return annotations;
+}
 function getRequestOptions() {
     const requestOptions = {
         headers: {
@@ -452,7 +466,8 @@ function getCacheEntry(key, restoreKeys, paths, options) {
             restore_keys: restoreKeys,
             cache_version: version,
             vcs_repository: getVCSRepository(),
-            vcs_ref: getVCSRef()
+            vcs_ref: getVCSRef(),
+            annotations: getAnnotations()
         };
         const response = yield (0, requestUtils_1.retryTypedResponse)('getCacheEntry', () => __awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl('cache/get'), getCacheRequest);
@@ -551,7 +566,8 @@ function reserveCache(cacheKey, numberOfChunks, cacheVersion) {
             number_of_chunks: numberOfChunks,
             content_type: 'application/zstd',
             vcs_repository: getVCSRepository(),
-            vcs_ref: getVCSRef()
+            vcs_ref: getVCSRef(),
+            annotations: getAnnotations()
         };
         const response = yield (0, requestUtils_1.retryTypedResponse)('reserveCache', () => __awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl('cache/reserve'), reserveCacheRequest);
@@ -574,7 +590,8 @@ function commitCache(cacheKey, cacheVersion, uploadKey, uploadID, parts) {
             parts: parts,
             vcs_type: 'github',
             vcs_repository: getVCSRepository(),
-            vcs_ref: getVCSRef()
+            vcs_ref: getVCSRef(),
+            annotations: getAnnotations()
         };
         return yield (0, requestUtils_1.retryTypedResponse)('commitCache', () => __awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl(`cache/commit`), commitCacheRequest);
@@ -645,7 +662,8 @@ function deleteCache(cacheKey, cacheVersion) {
             cache_key: cacheKey,
             cache_version: cacheVersion,
             vcs_repository: getVCSRepository(),
-            vcs_ref: getVCSRef()
+            vcs_ref: getVCSRef(),
+            annotations: getAnnotations()
         };
         const response = yield (0, requestUtils_1.retryTypedResponse)('deleteCacheEntry', () => __awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl('cache/delete'), deleteCacheRequest);
