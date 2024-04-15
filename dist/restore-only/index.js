@@ -236,6 +236,12 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             const numberOfChunks = Math.floor(archiveFileSize / maxChunkSize);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
             if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
+                core.debug(`Failed to reserve cache: ${reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode}`);
+                core.debug(`Reserve Cache Request: ${JSON.stringify({
+                    key,
+                    numberOfChunks,
+                    cacheVersion
+                })}`);
                 throw new Error((_c = (_b = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _b === void 0 ? void 0 : _b.message) !== null && _c !== void 0 ? _c : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
             }
             switch ((_d = reserveCacheResponse.result) === null || _d === void 0 ? void 0 : _d.provider) {
