@@ -7,7 +7,7 @@ on:
       - prajjwal-warp-245
 
 env:
-  WARPBUILD_CACHE_URL: 'https://a67f-36-255-234-176.ngrok-free.app'
+  WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
 
 jobs:
   perf-test:
