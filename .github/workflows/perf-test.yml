@@ -6,6 +6,9 @@ on:
       - main
       - prajjwal-warp-245
 
+env:
+  WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
+
 jobs:
   perf-test:
     runs-on: ubuntu-latest
