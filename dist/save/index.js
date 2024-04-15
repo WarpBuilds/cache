@@ -84,7 +84,7 @@ function checkKey(key) {
  * @returns boolean return true if Actions cache service feature is available, otherwise false
  */
 function isFeatureAvailable() {
-    return !!process.env['WARPBUILD_CACHE_URL'];
+    return !!process.env['WARPBUILD_RUNNER_VERIFICATION_TOKEN'];
 }
 exports.isFeatureAvailable = isFeatureAvailable;
 /**
