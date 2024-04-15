@@ -27,7 +27,7 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: test-500MB-234
+        key: test-500MB-234-2345
         enableCrossOsArchive: false
         enableCrossArchArchive: true
         restore-keys:
