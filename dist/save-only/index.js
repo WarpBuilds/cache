@@ -1185,7 +1185,8 @@ function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
             const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
             const transferManager = new storage_1.TransferManager(storage.bucket(bucketName));
             yield transferManager.downloadFileInChunks(objectName, {
-                destination: archivePath
+                destination: archivePath,
+                chunkSizeBytes: 8 * 1024 * 1024 // 8MB chunk size
             });
         }
         catch (error) {
