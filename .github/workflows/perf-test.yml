@@ -27,7 +27,7 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: fail-deliberately
+        key: fail-deliberately-again
         enableCrossOsArchive: false
         fail-on-cache-miss: true
         enableCrossArchArchive: true
