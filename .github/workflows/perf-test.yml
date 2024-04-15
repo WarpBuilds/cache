@@ -27,8 +27,9 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: matrix-text-100
+        key: fail-deliberately
         enableCrossOsArchive: false
+        fail-on-cache-miss: true
         enableCrossArchArchive: true
         restore-keys: |
           test-9
