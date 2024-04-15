@@ -22,18 +22,18 @@ jobs:
       run: mkdir -p temp && mkdir -p temp/temp1 && mkdir -p temp/temp2 && mkdir -p temp/temp3
     - name: Create temp2 directory
       run: mkdir -p temp2/temp3
-    # - name: Generate 100MB data from urandom
-    #   run: dd if=/dev/urandom of=temp/temp1/100MB bs=1M count=100
-    # - name: Generate 50MB data from urandom
-    #   run: dd if=/dev/urandom of=temp/temp3/50MB bs=1M count=50
+    - name: Generate 100MB data from urandom
+      run: dd if=/dev/urandom of=temp/temp1/100MB bs=1M count=100
+    - name: Generate 50MB data from urandom
+      run: dd if=/dev/urandom of=temp/temp3/50MB bs=1M count=50
     - name: WarpCache
       if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: |
           temp/temp1
-          temp2/temp3
-        key: test-multiple-path-2
+          temp/temp3
+        key: test-multiple-path-3
         enableCrossOsArchive: false
         enableCrossArchArchive: true
     - name: Verify correct files
