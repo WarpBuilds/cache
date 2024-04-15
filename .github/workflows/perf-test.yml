@@ -11,7 +11,7 @@ env:
 
 jobs:
   perf-test:
-    runs-on: ubuntu-latest
+    runs-on: warpdev-ubuntu-latest-x64-4x
     steps:
     - name: Checkout
       uses: actions/checkout@v3
