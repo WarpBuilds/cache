@@ -7,7 +7,7 @@ on:
       - prajjwal-warp-245
 
 env:
-  WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
+  WARPBUILD_CACHE_URL: 'https://a67f-36-255-234-176.ngrok-free.app'
 
 jobs:
   perf-test:
@@ -27,7 +27,7 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: test-500MB-234-2345
+        key: test-500MB-999
         enableCrossOsArchive: false
         enableCrossArchArchive: true
         restore-keys:
