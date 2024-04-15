@@ -31,9 +31,6 @@ jobs:
         enableCrossOsArchive: false
         fail-on-cache-miss: true
         enableCrossArchArchive: true
-        restore-keys: |
-          test-9
-          test-5
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
