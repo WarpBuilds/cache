@@ -30,7 +30,7 @@ jobs:
         key: test-500MB-999
         enableCrossOsArchive: false
         enableCrossArchArchive: true
-        restore-keys:
+        restore-keys: |
           test-9
           test-5
     - name: Cache
