@@ -13,7 +13,7 @@ jobs:
   perf-test:
     strategy:
       matrix:
-        os: [warpdev-ubuntu-latest-x64-4x, ubuntu-latest]
+        os: [warpdev-ubuntu-latest-x64-4x]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -28,6 +28,7 @@ jobs:
       with:
         path: temp/
         key: test-5GB
+        delete-cache: true
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
