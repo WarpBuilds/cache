@@ -27,9 +27,9 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: fail-deliberately-again
+        key: fail-deliberately
         enableCrossOsArchive: false
-        fail-on-cache-miss: true
+        lookup-only: true
         enableCrossArchArchive: true
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
