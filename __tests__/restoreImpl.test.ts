@@ -106,7 +106,8 @@ test("restore on GHES with AC available ", async () => {
     testUtils.setInputs({
         path: path,
         key,
-        enableCrossOsArchive: false
+        enableCrossOsArchive: false,
+        enableCrossArchArchive: false
     });
 
     const infoMock = jest.spyOn(core, "info");

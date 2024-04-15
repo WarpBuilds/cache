@@ -67,10 +67,15 @@ async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
             Inputs.EnableCrossOsArchive
         );
 
+        const enableCrossArchArchive = utils.getInputAsBool(
+            Inputs.EnableCrossArchArchive
+        );
+
         cacheId = await cache.saveCache(
             cachePaths,
             primaryKey,
-            enableCrossOsArchive
+            enableCrossOsArchive,
+            enableCrossArchArchive
         );
 
         if (cacheId != "") {

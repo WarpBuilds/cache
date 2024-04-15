@@ -59,7 +59,8 @@ test("restore with no cache found", async () => {
     testUtils.setInputs({
         path: path,
         key,
-        enableCrossOsArchive: false
+        enableCrossOsArchive: false,
+        enableCrossArchArchive: false
     });
 
     const infoMock = jest.spyOn(core, "info");
@@ -102,7 +103,8 @@ test("restore with restore keys and no cache found", async () => {
         path: path,
         key,
         restoreKeys: [restoreKey],
-        enableCrossOsArchive: false
+        enableCrossOsArchive: false,
+        enableCrossArchArchive: false
     });
 
     const infoMock = jest.spyOn(core, "info");
@@ -143,7 +145,8 @@ test("restore with cache found for key", async () => {
     testUtils.setInputs({
         path: path,
         key,
-        enableCrossOsArchive: false
+        enableCrossOsArchive: false,
+        enableCrossArchArchive: false
     });
 
     const infoMock = jest.spyOn(core, "info");
@@ -188,7 +191,8 @@ test("restore with cache found for restore key", async () => {
         path: path,
         key,
         restoreKeys: [restoreKey],
-        enableCrossOsArchive: false
+        enableCrossOsArchive: false,
+        enableCrossArchArchive: false
     });
 
     const infoMock = jest.spyOn(core, "info");
