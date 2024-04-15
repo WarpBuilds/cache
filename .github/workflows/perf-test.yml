@@ -13,7 +13,7 @@ jobs:
   perf-test:
     strategy:
       matrix:
-        os: [warpdev-ubuntu-latest-x64-4x]
+        os: [warpdev-ubuntu-latest-x64-2x]
     runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
@@ -21,15 +21,14 @@ jobs:
     - name: Create a temp directory
       run: mkdir -p temp
     - name: Generate 100MB data from urandom
-      run: dd if=/dev/urandom of=temp/100MB bs=1M count=100
+      run: dd if=/dev/urandom of=temp/100MB bs=1M count=16000
     - name: WarpCache
-      if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
+      if: matrix.os == 'warpdev-ubuntu-latest-x64-2x'
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: fail-deliberately
+        key: test-16GB
         enableCrossOsArchive: false
-        lookup-only: true
         enableCrossArchArchive: true
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
