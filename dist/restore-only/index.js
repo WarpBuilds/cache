@@ -47,6 +47,7 @@ const cacheHttpClient = __importStar(__nccwpck_require__(8245));
 const tar_1 = __nccwpck_require__(6490);
 const options_1 = __nccwpck_require__(6215);
 const requestUtils_1 = __nccwpck_require__(3981);
+const downloadUtils_1 = __nccwpck_require__(5500);
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -98,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -157,28 +158,41 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         return cacheKey;
                     }
                     const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
-                    // await cacheHttpClient.downloadCache(
-                    //   cacheEntry.provider,
-                    //   archiveLocation,
-                    //   archivePath,
-                    //   cacheEntry.gcs?.short_lived_token?.access_token ?? ''
-                    // )
-                    // if (core.isDebug()) {
-                    //   await listTar(archivePath, compressionMethod)
-                    // }
-                    // const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath)
-                    // core.info(
-                    //   `Cache Size: ~${Math.round(
-                    //     archiveFileSize / (1024 * 1024)
-                    //   )} MB (${archiveFileSize} B)`
-                    // )
-                    // await extractTar(archivePath, compressionMethod)
-                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
-                    const readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_j = (_h = (_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.short_lived_token) === null || _h === void 0 ? void 0 : _h.access_token) !== null && _j !== void 0 ? _j : '');
-                    if (!readStream) {
-                        return undefined;
+                    /*
+                    * Alternate, Multipart download method for GCS
+                    await cacheHttpClient.downloadCache(
+                      cacheEntry.provider,
+                      archiveLocation,
+                      archivePath,
+                      cacheEntry.gcs?.short_lived_token?.access_token ?? ''
+                    )
+            
+                    if (core.isDebug()) {
+                      await listTar(archivePath, compressionMethod)
                     }
-                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod);
+            
+                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath)
+                    core.info(
+                      `Cache Size: ~${Math.round(
+                        archiveFileSize / (1024 * 1024)
+                      )} MB (${archiveFileSize} B)`
+                    )
+            
+                    await extractTar(archivePath, compressionMethod)
+                    */
+                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
+                    let readStream;
+                    let downloadCommandPipe;
+                    if ((_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.pre_signed_url) {
+                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url);
+                    }
+                    else {
+                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_l = (_k = (_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.short_lived_token) === null || _k === void 0 ? void 0 : _k.access_token) !== null && _l !== void 0 ? _l : '');
+                        if (!readStream) {
+                            return undefined;
+                        }
+                    }
+                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
                     core.info('Cache restored successfully');
                     break;
                 }
@@ -954,7 +968,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.downloadCacheStreamingGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
+exports.getDownloadCommandPipeForWget = exports.downloadCacheStreamingGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const fs = __importStar(__nccwpck_require__(7147));
@@ -964,6 +978,7 @@ const utils = __importStar(__nccwpck_require__(1518));
 const constants_1 = __nccwpck_require__(8840);
 const requestUtils_1 = __nccwpck_require__(3981);
 const storage_1 = __nccwpck_require__(7577);
+const child_process_1 = __nccwpck_require__(2081);
 /**
  * Pipes the body of a HTTP response to a stream
  *
@@ -1229,6 +1244,10 @@ function downloadCacheStreamingGCP(storage, archiveLocation) {
     }
 }
 exports.downloadCacheStreamingGCP = downloadCacheStreamingGCP;
+function getDownloadCommandPipeForWget(url) {
+    return (0, child_process_1.spawn)('wget', ['-qO', '-', url]);
+}
+exports.getDownloadCommandPipeForWget = getDownloadCommandPipeForWget;
 //# sourceMappingURL=downloadUtils.js.map
 
 /***/ }),
@@ -1741,16 +1760,21 @@ exports.extractTar = extractTar;
 /*
  * NOTE: Currently tested only on archives created using tar and zstd
  */
-function extractStreamingTar(stream, archivePath, compressionMethod) {
+function extractStreamingTar(stream, archivePath, compressionMethod, downloadCommandPipe) {
     return __awaiter(this, void 0, void 0, function* () {
         const workingDirectory = getWorkingDirectory();
         yield io.mkdirP(workingDirectory);
         const commandPipes = yield getCommandPipes(compressionMethod, TAR_MODE.EXTRACT_STREAM, archivePath);
+        if (downloadCommandPipe) {
+            commandPipes.unshift(downloadCommandPipe);
+        }
         if (commandPipes.length < 2) {
             throw new Error('At least two processes should be present as the archive is compressed at least twice.');
         }
         return new Promise((resolve, reject) => {
-            stream.pipe(commandPipes[0].stdin);
+            if (stream) {
+                stream.pipe(commandPipes[0].stdin);
+            }
             for (let i = 0; i < commandPipes.length - 1; i++) {
                 commandPipes[i].stdout.pipe(commandPipes[i + 1].stdin);
                 commandPipes[i].stderr.on('data', data => {
