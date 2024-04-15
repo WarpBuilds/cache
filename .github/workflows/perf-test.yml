@@ -11,27 +11,26 @@ env:
 
 jobs:
   perf-test:
-    runs-on: warpdev-ubuntu-latest-x64-4x
+    strategy:
+      matrix:
+        os: [warpdev-ubuntu-latest-x64-4x, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Checkout
       uses: actions/checkout@v3
     - name: Create a temp directory
       run: mkdir -p temp
-    - name: Generate 100MB data from urandom
-      run: dd if=/dev/urandom of=temp/100MB bs=1M count=100
+    - name: Generate 500MB data from urandom
+      run: dd if=/dev/urandom of=temp/500MB bs=1M count=500
     - name: WarpCache
+      if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
       uses: WarpBuilds/cache@v1.0.2-beta
       with:
         path: temp/
-        key: test-100MB
+        key: test-500MB
     - name: Cache
+      if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
       with:
         path: temp/
-        key: test-100MB
-
-    # - run: npm ci
-    # - name: Prettier Format Check
-    #   run: npm run format-check
-    # - name: ESLint Check
-    #   run: npm run lint
+        key: test-500MB
