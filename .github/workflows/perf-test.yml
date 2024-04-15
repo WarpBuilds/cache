@@ -5,6 +5,7 @@ on:
     branches:
       - main
       - prajjwal-warp-245
+      - test/branch-level-scoping
 
 env:
   WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
