@@ -157,23 +157,28 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         return cacheKey;
                     }
                     const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
-                    yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_j = (_h = (_g = cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.short_lived_token) === null || _h === void 0 ? void 0 : _h.access_token) !== null && _j !== void 0 ? _j : '');
-                    if (core.isDebug()) {
-                        yield (0, tar_1.listTar)(archivePath, compressionMethod);
-                    }
-                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-                    core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
-                    yield (0, tar_1.extractTar)(archivePath, compressionMethod);
-                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
-                    // const readStream = cacheHttpClient.downloadCacheStreaming(
-                    //   'gcs',
+                    // await cacheHttpClient.downloadCache(
+                    //   cacheEntry.provider,
                     //   archiveLocation,
-                    //   cacheEntry?.gcs?.short_lived_token?.access_token ?? ''
+                    //   archivePath,
+                    //   cacheEntry.gcs?.short_lived_token?.access_token ?? ''
                     // )
-                    // if (!readStream) {
-                    //   return undefined
+                    // if (core.isDebug()) {
+                    //   await listTar(archivePath, compressionMethod)
                     // }
-                    // await extractStreamingTar(readStream, archivePath, compressionMethod)
+                    // const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath)
+                    // core.info(
+                    //   `Cache Size: ~${Math.round(
+                    //     archiveFileSize / (1024 * 1024)
+                    //   )} MB (${archiveFileSize} B)`
+                    // )
+                    // await extractTar(archivePath, compressionMethod)
+                    // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
+                    const readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_j = (_h = (_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.short_lived_token) === null || _h === void 0 ? void 0 : _h.access_token) !== null && _j !== void 0 ? _j : '');
+                    if (!readStream) {
+                        return undefined;
+                    }
+                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod);
                     core.info('Cache restored successfully');
                     break;
                 }
