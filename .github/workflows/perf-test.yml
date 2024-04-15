@@ -21,16 +21,16 @@ jobs:
     - name: Create a temp directory
       run: mkdir -p temp
     - name: Generate 500MB data from urandom
-      run: dd if=/dev/urandom of=temp/500MB bs=1M count=500
+      run: dd if=/dev/urandom of=temp/5GB bs=1M count=5000
     - name: WarpCache
       if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
       uses: WarpBuilds/cache@v1.0.2-beta
       with:
         path: temp/
-        key: test-500MB
+        key: test-5GB
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
       with:
         path: temp/
-        key: test-500MB
+        key: test-5GB
