@@ -25,7 +25,7 @@ jobs:
     - name: Generate 100MB data from urandom
       run: dd if=/dev/urandom of=temp/temp1/100MB bs=1M count=100
     - name: Generate 50MB data from urandom
-      run: dd if=/dev/urandom of=temp2/temp3/50MB bs=1M count=50
+      run: dd if=/dev/urandom of=temp/temp3/50MB bs=1M count=50
     - name: WarpCache
       if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
       uses: WarpBuilds/cache@v1.1.2-beta
@@ -33,7 +33,7 @@ jobs:
         path: |
           temp/temp1
           temp2/temp3
-        key: test-multiple-path
+        key: test-multiple-path-2
         enableCrossOsArchive: false
         enableCrossArchArchive: true
     - name: Verify correct files
