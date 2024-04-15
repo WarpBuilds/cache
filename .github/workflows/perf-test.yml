@@ -29,7 +29,7 @@ jobs:
         path: temp/
         key: test-500MB
         enableCrossOsArchive: true
-        enableCrossArchArchive: true
+        enableCrossArchArchive: false
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
