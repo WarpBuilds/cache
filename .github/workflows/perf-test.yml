@@ -27,9 +27,12 @@ jobs:
       uses: WarpBuilds/cache@v1.1.2-beta
       with:
         path: temp/
-        key: test-500MB
+        key: test-500MB-234
         enableCrossOsArchive: false
         enableCrossArchArchive: false
+        restore-keys:
+          test-9
+          test-5
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
       uses: actions/cache@v4.0.2
