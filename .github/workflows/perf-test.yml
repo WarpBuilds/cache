@@ -7,7 +7,7 @@ on:
       - prajjwal-warp-245
 
 env:
-  WARPBUILD_CACHE_URL: 'https://f7c4-36-255-233-41.ngrok-free.app'
+  WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
 
 jobs:
   perf-test:
@@ -22,13 +22,13 @@ jobs:
         key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-node-
-    # - name: Cache
-    #   uses: actions/cache@v4.0.2
-    #   with:
-    #     path: ~/.npm
-    #     key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-    #     restore-keys: |
-    #       ${{ runner.os }}-node-
+    - name: Cache
+      uses: actions/cache@v4.0.2
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
 
     - run: npm ci
     - name: Prettier Format Check
