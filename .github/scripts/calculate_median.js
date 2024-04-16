@@ -2,31 +2,35 @@ const { Octokit } = require("@octokit/rest");
 
 async function main() {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-    const owner = "Warpbuilds";
+    const owner = "WarpBuilds";
     const repo = "cache";
-    const run_id = process.env.GITHUB_RUN_ID;
+    const run_id = process.env.GITHUB_RUN_ID; // Current workflow run ID
 
     try {
-        // Fetch jobs for the current workflow run
-        const jobs = await octokit.rest.actions.listJobsForWorkflowRun({
+        const job = await octokit.rest.actions.getJobForWorkflowRun({
             owner,
             repo,
-            run_id
+            job_id: run_id
         });
 
         let warpCacheDurations = [];
         let cacheDurations = [];
 
-        for (const job of jobs.data.jobs) {
-            console.log(job);
-            const durationSeconds =
-                (new Date(job.completed_at) - new Date(job.started_at)) / 1000;
-            if (job.name === "WarpCache") {
+        job.data.steps.forEach(step => {
+            console.los(step);
+            if (step.name === "WarpCache" && step.conclusion === "success") {
+                const start = new Date(step.started_at).getTime();
+                const end = new Date(step.completed_at).getTime();
+                const durationSeconds = (end - start) / 1000;
                 warpCacheDurations.push(durationSeconds);
-            } else if (job.name === "Cache") {
+            }
+            if (step.name === "Cache" && step.conclusion === "success") {
+                const start = new Date(step.started_at).getTime();
+                const end = new Date(step.completed_at).getTime();
+                const durationSeconds = (end - start) / 1000;
                 cacheDurations.push(durationSeconds);
             }
-        }
+        });
 
         function calculateMedian(durations) {
             if (durations.length === 0) return null;
