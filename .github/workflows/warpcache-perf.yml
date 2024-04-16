@@ -1,0 +1,37 @@
+name: WarpCache Run Test
+
+on:
+  push:
+    branches:
+      - perf-test-warpcache
+  workflow_dispatch:
+
+jobs:
+  perf-test:
+    strategy:
+      matrix:
+        os: [warp-ubuntu-latest-x64-4x, ubuntu-latest]
+        size: [500]
+        run: [10, 20, 30, 40, 50, 60, 70, 80, 90]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Create a temp directory
+        run: mkdir -p temp
+      - name: Generate ${{matrix.size}}MB data from urandom
+        run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
+      - name: Sleep
+        run: sleep ${{ matrix.run }}
+      - name: WarpCache
+        if: matrix.os == 'warp-ubuntu-latest-x64-4x'
+        uses: WarpBuilds/cache@v1
+        with:
+          path: temp/
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.run }}s
+      - name: Cache
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/cache@v4.0.2
+        with:
+          path: temp/
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.run }}s
