@@ -2,22 +2,33 @@ const { Octokit } = require("@octokit/rest");
 
 async function main() {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-    const owner = "WarpBuilds";
+    const owner = "Warpbuilds";
     const repo = "cache";
-    const run_id = process.env.GITHUB_RUN_ID;
+    const run_id = process.env.GITHUB_RUN_ID; // Gets the run ID of the current workflow run
 
     try {
-        // Fetch all jobs for the current workflow run
-        const jobs = await octokit.rest.actions.listJobsForWorkflowRun({
-            owner,
-            repo,
-            run_id
-        });
+        let allJobs = [];
+        let page = 0;
+        let per_page = 30; // Adjust based on API limits and performance considerations
+
+        while (true) {
+            page++;
+            const jobsResponse =
+                await octokit.rest.actions.listJobsForWorkflowRun({
+                    owner,
+                    repo,
+                    run_id,
+                    per_page,
+                    page
+                });
+            allJobs = allJobs.concat(jobsResponse.data.jobs);
+            if (jobsResponse.data.jobs.length < per_page) break; // Exit loop if last page
+        }
 
         let warpCacheDurations = [];
         let cacheDurations = [];
 
-        for (const job of jobs.data.jobs) {
+        for (const job of allJobs) {
             for (const step of job.steps) {
                 if (
                     step.name === "WarpCache" &&
