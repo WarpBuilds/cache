@@ -4,12 +4,12 @@ async function main() {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
     const owner = "WarpBuilds";
     const repo = "cache";
-    const run_id = process.env.GITHUB_RUN_ID; // Gets the run ID of the current workflow run
+    const run_id = process.env.GITHUB_RUN_ID;
 
     try {
         let allJobs = [];
         let page = 0;
-        let per_page = 30; // Adjust based on API limits and performance considerations
+        let per_page = 50;
 
         while (true) {
             page++;
@@ -21,30 +21,39 @@ async function main() {
                     per_page,
                     page
                 });
+            if (jobsResponse.status !== 200) {
+                console.error(
+                    `Failed to fetch page ${page}: ${jobsResponse.status}`
+                );
+                break; // Exit loop on API error
+            }
+            if (jobsResponse.data.jobs.length === 0) {
+                break; // Exit loop if no more jobs
+            }
             allJobs = allJobs.concat(jobsResponse.data.jobs);
-            if (jobsResponse.data.jobs.length < per_page) break; // Exit loop if last page
+            console.log(
+                `Fetched page ${page}, jobs count: ${jobsResponse.data.jobs.length}`
+            );
         }
 
         let warpCacheDurations = [];
         let cacheDurations = [];
 
         for (const job of allJobs) {
+            if (!job.steps) continue; // Skip if no steps data
             for (const step of job.steps) {
+                const start = new Date(step.started_at).getTime();
+                const end = new Date(step.completed_at).getTime();
+                const durationSeconds = (end - start) / 1000;
                 if (
                     step.name === "WarpCache" &&
                     step.conclusion === "success"
                 ) {
-                    const start = new Date(step.started_at).getTime();
-                    const end = new Date(step.completed_at).getTime();
-                    const durationSeconds = (end - start) / 1000;
                     warpCacheDurations.push(durationSeconds);
                 } else if (
                     step.name === "Cache" &&
                     step.conclusion === "success"
                 ) {
-                    const start = new Date(step.started_at).getTime();
-                    const end = new Date(step.completed_at).getTime();
-                    const durationSeconds = (end - start) / 1000;
                     cacheDurations.push(durationSeconds);
                 }
             }
