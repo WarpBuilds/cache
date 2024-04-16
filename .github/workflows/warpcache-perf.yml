@@ -11,8 +11,9 @@ jobs:
     strategy:
       matrix:
         os: [warp-ubuntu-latest-x64-4x, ubuntu-latest]
-        size: [5000]
-        run: [10, 20, 30, 40, 50, 60, 70, 80, 90]
+        size: [500]
+        # run: [10, 20, 30, 40, 50, 60, 70, 80, 90]
+        jobs: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -21,17 +22,17 @@ jobs:
         run: mkdir -p temp
       - name: Generate ${{matrix.size}}MB data from urandom
         run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
-      - name: Sleep
-        run: sleep ${{ matrix.run }}
+      # - name: Sleep
+      #   run: sleep ${{ matrix.run }}
       - name: WarpCache
         if: matrix.os == 'warp-ubuntu-latest-x64-4x'
         uses: WarpBuilds/cache@v1
         with:
           path: temp/
-          key: perf-test-${{ matrix.size }}MB-${{ matrix.run }}s
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}s
       - name: Cache
         if: matrix.os == 'ubuntu-latest'
         uses: actions/cache@v4.0.2
         with:
           path: temp/
-          key: perf-test-${{ matrix.size }}MB-${{ matrix.run }}s
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}s
