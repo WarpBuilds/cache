@@ -37,7 +37,9 @@ async function main() {
         }
 
         let warpCacheDurations = [];
+        let postWarpCacheDurations = [];
         let cacheDurations = [];
+        let postCacheDurations = [];
 
         for (const job of allJobs) {
             if (!job.steps) continue; // Skip if no steps data
@@ -55,6 +57,16 @@ async function main() {
                     step.conclusion === "success"
                 ) {
                     cacheDurations.push(durationSeconds);
+                } else if (
+                    step.name === "Post WarpCache" &&
+                    step.conclusion === "success"
+                ) {
+                    postWarpCacheDurations.push(durationSeconds);
+                } else if (
+                    step.name === "Post Cache" &&
+                    step.conclusion === "success"
+                ) {
+                    postCacheDurations.push(durationSeconds);
                 }
             }
         }
@@ -70,12 +82,20 @@ async function main() {
 
         const medianWarpCache = calculateMedian(warpCacheDurations);
         const medianCache = calculateMedian(cacheDurations);
+        const medianPostWarpCache = calculateMedian(postWarpCacheDurations);
+        const medianPostCache = calculateMedian(postCacheDurations);
 
         console.log(
             `The median duration for WarpCache across all jobs is ${medianWarpCache} seconds.`
         );
         console.log(
             `The median duration for Cache across all jobs is ${medianCache} seconds.`
+        );
+        console.log(
+            `The median duration for PostWarpCache across all jobs is ${medianPostWarpCache} seconds.`
+        );
+        console.log(
+            `The median duration for PostCache across all jobs is ${medianPostCache} seconds.`
         );
     } catch (error) {
         console.error(`Error fetching job data: ${error}`);
