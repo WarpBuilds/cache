@@ -2,7 +2,7 @@ const { Octokit } = require("@octokit/rest");
 
 async function main() {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
-    const owner = "Warpbuilds";
+    const owner = "WarpBuilds";
     const repo = "cache";
     const run_id = process.env.GITHUB_RUN_ID; // Gets the run ID of the current workflow run
 
