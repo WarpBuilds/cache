@@ -4,33 +4,40 @@ async function main() {
     const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
     const owner = "WarpBuilds";
     const repo = "cache";
-    const run_id = process.env.GITHUB_RUN_ID; // Current workflow run ID
+    const run_id = process.env.GITHUB_RUN_ID;
 
     try {
-        const job = await octokit.rest.actions.getJobForWorkflowRun({
+        // Fetch all jobs for the current workflow run
+        const jobs = await octokit.rest.actions.listJobsForWorkflowRun({
             owner,
             repo,
-            job_id: run_id
+            run_id
         });
 
         let warpCacheDurations = [];
         let cacheDurations = [];
 
-        job.data.steps.forEach(step => {
-            console.los(step);
-            if (step.name === "WarpCache" && step.conclusion === "success") {
-                const start = new Date(step.started_at).getTime();
-                const end = new Date(step.completed_at).getTime();
-                const durationSeconds = (end - start) / 1000;
-                warpCacheDurations.push(durationSeconds);
+        for (const job of jobs.data.jobs) {
+            for (const step of job.steps) {
+                if (
+                    step.name === "WarpCache" &&
+                    step.conclusion === "success"
+                ) {
+                    const start = new Date(step.started_at).getTime();
+                    const end = new Date(step.completed_at).getTime();
+                    const durationSeconds = (end - start) / 1000;
+                    warpCacheDurations.push(durationSeconds);
+                } else if (
+                    step.name === "Cache" &&
+                    step.conclusion === "success"
+                ) {
+                    const start = new Date(step.started_at).getTime();
+                    const end = new Date(step.completed_at).getTime();
+                    const durationSeconds = (end - start) / 1000;
+                    cacheDurations.push(durationSeconds);
+                }
             }
-            if (step.name === "Cache" && step.conclusion === "success") {
-                const start = new Date(step.started_at).getTime();
-                const end = new Date(step.completed_at).getTime();
-                const durationSeconds = (end - start) / 1000;
-                cacheDurations.push(durationSeconds);
-            }
-        });
+        }
 
         function calculateMedian(durations) {
             if (durations.length === 0) return null;
@@ -45,9 +52,11 @@ async function main() {
         const medianCache = calculateMedian(cacheDurations);
 
         console.log(
-            `The median duration for WarpCache is ${medianWarpCache} seconds.`
+            `The median duration for WarpCache across all jobs is ${medianWarpCache} seconds.`
         );
-        console.log(`The median duration for Cache is ${medianCache} seconds.`);
+        console.log(
+            `The median duration for Cache across all jobs is ${medianCache} seconds.`
+        );
     } catch (error) {
         console.error(`Error fetching job data: ${error}`);
     }
