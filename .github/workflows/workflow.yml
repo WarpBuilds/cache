@@ -87,6 +87,8 @@ jobs:
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
     services:
       squid-proxy:
         image: ubuntu/squid:latest
@@ -110,6 +112,8 @@ jobs:
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
     services:
       squid-proxy:
         image: ubuntu/squid:latest
