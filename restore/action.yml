@@ -1,6 +1,6 @@
 name: 'Restore Cache'
 description: 'Restore Cache artifacts like dependencies and build outputs to improve workflow execution time'
-author: 'GitHub'
+author: 'WarpBuild'
 inputs:
   path:
     description: 'A list of files, directories, and wildcard patterns to restore'
