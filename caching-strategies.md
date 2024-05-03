@@ -11,8 +11,8 @@ This document lists some of the strategies (and example workflows if possible) w
 ```yaml
 jobs:
   build:
-    runs-on: ubuntu-latest
-    - uses: actions/cache@v3
+    runs-on: warp-ubuntu-latest-x64-4x
+    - uses: WarpBuilds/cache@v1
       with:
         key: ${{ some-metadata }}-cache
 ```
@@ -24,7 +24,7 @@ In your workflows, you can use different strategies to name your key depending o
 One of the most common use case is to use hash for lockfile as key. This way, same cache will be restored for a lockfile until there's a change in dependencies listed in lockfile.
 
 ```yaml
-  - uses: actions/cache@v3
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -37,7 +37,7 @@ One of the most common use case is to use hash for lockfile as key. This way, sa
 If cache is not found matching the primary key, restore keys can be used to download the closest matching cache that was recently created. This ensures that the build/install step will need to additionally fetch just a handful of newer dependencies, and hence saving build time.
 
 ```yaml
-  - uses: actions/cache@v3
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -54,7 +54,7 @@ The restore keys can be provided as a complete name, or a prefix, read more [her
 In case of workflows with matrix running for multiple Operating Systems, the caches can be stored separately for each of them. This can be used in combination with hashfiles in case multiple caches are being generated per OS.
 
 ```yaml
-  - uses: actions/cache@v3
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -73,7 +73,7 @@ Caches scoped to the particular workflow run id or run attempt can be stored and
 On similar lines, commit sha can be used to create a very specialized and short lived cache.
 
 ```yaml
-  - uses: actions/cache@v3
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -86,7 +86,7 @@ On similar lines, commit sha can be used to create a very specialized and short 
 Cache key can be formed by combination of more than one metadata, evaluated info.
 
 ```yaml
-  - uses: actions/cache@v3
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -148,7 +148,7 @@ In case you are using a centralized job to create and save your cache that can b
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -173,7 +173,7 @@ You can use the output of this action to exit the workflow on cache miss. This w
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -194,7 +194,7 @@ steps:
 If you want to avoid re-computing the cache key again in `save` action, the outputs from `restore` action can be used as input to the `save` action.
 
 ```yaml
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: restore-cache
     with:
       path: |
@@ -204,7 +204,7 @@ If you want to avoid re-computing the cache key again in `save` action, the outp
   .
   .
   .
-  - uses: actions/cache/save@v3
+  - uses: WarpBuilds/cache/save@v1
     with:
       path: |
         path/to/dependencies
@@ -219,7 +219,7 @@ On the other hand, the key can also be explicitly re-computed while executing th
 Let's say we have a restore step that computes key at runtime
 
 ```yaml
-uses: actions/cache/restore@v3
+uses: WarpBuilds/cache/restore@v1
 id: restore-cache
 with:
     key: cache-${{ hashFiles('**/lockfiles') }}
@@ -228,7 +228,7 @@ with:
 Case 1: Where an user would want to reuse the key as it is
 
 ```yaml
-uses: actions/cache/save@v3
+uses: WarpBuilds/cache/save@v1
 with:
     key: ${{ steps.restore-cache.outputs.cache-primary-key }}
 ```
@@ -236,16 +236,16 @@ with:
 Case 2: Where the user would want to re-evaluate the key
 
 ```yaml
-uses: actions/cache/save@v3
+uses: WarpBuilds/cache/save@v1
 with:
     key: npm-cache-${{hashfiles(package-lock.json)}}
 ```
 
 ### Saving cache even if the build fails
 
-There can be cases where a cache should be saved even if the build job fails. For example, a job can fail due to flaky tests but the caches can still be re-used. You can use `actions/cache/save` action to save the cache by using `if: always()` condition.
+There can be cases where a cache should be saved even if the build job fails. For example, a job can fail due to flaky tests but the caches can still be re-used. You can use `WarpBuilds/cache/save` action to save the cache by using `if: always()` condition.
 
-Similarly, `actions/cache/save` action can be conditionally used based on the output of the previous steps. This way you get more control on when to save the cache.
+Similarly, `WarpBuilds/cache/save` action can be conditionally used based on the output of the previous steps. This way you get more control on when to save the cache.
 
 ```yaml
 steps:
@@ -255,7 +255,7 @@ steps:
   .
   - name: Build
     run: /build.sh
-  - uses: actions/cache/save@v3
+  - uses: WarpBuilds/cache/save@v1
     if: always() // or any other condition to invoke the save action
     with:
       path: path/to/dependencies
@@ -264,7 +264,7 @@ steps:
 
 ### Saving cache once and reusing in multiple workflows
 
-In case of multi-module projects, where the built artifact of one project needs to be reused in subsequent child modules, the need of rebuilding the parent module again and again with every build can be eliminated. The `actions/cache` or `actions/cache/save` action can be used to build and save the parent module artifact once, and restored multiple times while building the child modules.
+In case of multi-module projects, where the built artifact of one project needs to be reused in subsequent child modules, the need of rebuilding the parent module again and again with every build can be eliminated. The `WarpBuilds/cache` or `WarpBuilds/cache/save` action can be used to build and save the parent module artifact once, and restored multiple times while building the child modules.
 
 #### Step 1 - Build the parent module and save it
 
@@ -275,7 +275,7 @@ steps:
   - name: Build
     run: ./build-parent-module.sh
 
-  - uses: actions/cache/save@v3
+  - uses: WarpBuilds/cache/save@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -288,7 +288,7 @@ steps:
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -297,7 +297,7 @@ steps:
   - name: Install Dependencies
     if: steps.cache.outputs.cache-hit != 'true'
     run: ./install.sh
-      
+
   - name: Build
     run: ./build-child-module.sh
 
