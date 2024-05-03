@@ -97,8 +97,6 @@ jobs:
     env:
       https_proxy: http://squid-proxy:3128
     steps:
-    - name: Install wget
-      run: apt-get update && apt-get install -y wget
     - name: Checkout
       uses: actions/checkout@v3
     - name: Generate files
@@ -113,7 +111,6 @@ jobs:
     runs-on: warp-ubuntu-latest-x64-16x
     container:
       image: ubuntu:latest
-      options: --dns 127.0.0.1
       env:
         WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
     services:
@@ -124,6 +121,7 @@ jobs:
     env:
       https_proxy: http://squid-proxy:3128
     steps:
+      # Wget is required by the WarpBuild Cache Action
     - name: Install wget
       run: apt-get update && apt-get install -y wget
     - name: Checkout
