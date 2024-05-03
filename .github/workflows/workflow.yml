@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,7 +38,7 @@ jobs:
   test-save:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -61,7 +61,7 @@ jobs:
     needs: test-save
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -83,7 +83,7 @@ jobs:
 
   # End to end with proxy
   test-proxy-save:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
@@ -106,7 +106,7 @@ jobs:
         path: test-cache
   test-proxy-restore:
     needs: test-proxy-save
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1

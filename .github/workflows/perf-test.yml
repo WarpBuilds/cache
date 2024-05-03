@@ -41,7 +41,7 @@ jobs:
 
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/cache@v4.0.2
+      uses: WarpBuilds/cache@v1
       with:
         path: temp/
         key: test-1GB

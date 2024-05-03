@@ -14,7 +14,9 @@ import * as utils from "./utils/actionUtils";
 // throw an uncaught exception.  Instead of failing this action, just warn.
 process.on("uncaughtException", e => utils.logWarning(e.message));
 
-async function saveImpl(stateProvider: IStateProvider): Promise<string | void> {
+export async function saveImpl(
+    stateProvider: IStateProvider
+): Promise<string | void> {
     let cacheId = "";
     try {
         if (!utils.isCacheFeatureAvailable()) {
