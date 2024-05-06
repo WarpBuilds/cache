@@ -220,7 +220,7 @@ test("isCacheFeatureAvailable for ac disabled on dotcom", () => {
     jest.spyOn(cache, "isFeatureAvailable").mockImplementation(() => false);
 
     const message =
-        "An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.";
+        "An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions.";
     const infoMock = jest.spyOn(core, "info");
 
     try {

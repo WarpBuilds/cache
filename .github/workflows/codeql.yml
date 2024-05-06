@@ -9,7 +9,7 @@ on:
 jobs:
   CodeQL-Build:
     # CodeQL runs on ubuntu-latest, windows-latest, and macos-latest
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
 
     permissions:
       # required for all workflows

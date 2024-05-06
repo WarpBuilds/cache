@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,7 +38,7 @@ jobs:
   test-save:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -61,7 +61,7 @@ jobs:
     needs: test-save
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macOS-latest]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -83,10 +83,12 @@ jobs:
 
   # End to end with proxy
   test-proxy-save:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
     container:
       image: ubuntu:latest
       options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
     services:
       squid-proxy:
         image: ubuntu/squid:latest
@@ -106,10 +108,11 @@ jobs:
         path: test-cache
   test-proxy-restore:
     needs: test-proxy-save
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-16x
     container:
       image: ubuntu:latest
-      options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
     services:
       squid-proxy:
         image: ubuntu/squid:latest
@@ -118,6 +121,9 @@ jobs:
     env:
       https_proxy: http://squid-proxy:3128
     steps:
+      # Wget is required by the WarpBuild Cache Action
+    - name: Install wget
+      run: apt-get update && apt-get install -y wget
     - name: Checkout
       uses: actions/checkout@v3
     - name: Restore cache

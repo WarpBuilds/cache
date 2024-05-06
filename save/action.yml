@@ -1,6 +1,6 @@
 name: 'Save a cache'
 description: 'Save Cache artifacts like dependencies and build outputs to improve workflow execution time'
-author: 'GitHub'
+author: 'WarpBuild'
 inputs:
   path:
     description: 'A list of files, directories, and wildcard patterns to cache'

@@ -43241,7 +43241,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.saveRun = exports.saveOnlyRun = void 0;
+exports.saveRun = exports.saveOnlyRun = exports.saveImpl = void 0;
 const cache = __importStar(__nccwpck_require__(7799));
 const core = __importStar(__nccwpck_require__(2186));
 const constants_1 = __nccwpck_require__(9042);
@@ -43298,6 +43298,7 @@ function saveImpl(stateProvider) {
         return cacheId;
     });
 }
+exports.saveImpl = saveImpl;
 function saveOnlyRun(earlyExit) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -43514,7 +43515,7 @@ function isCacheFeatureAvailable() {
 Otherwise please upgrade to GHES version >= 3.5 and If you are also using Github Connect, please unretire the actions/cache namespace before upgrade (see https://docs.github.com/en/enterprise-server@3.5/admin/github-actions/managing-access-to-actions-from-githubcom/enabling-automatic-access-to-githubcom-actions-using-github-connect#automatic-retirement-of-namespaces-for-actions-accessed-on-githubcom)`);
         return false;
     }
-    logWarning("An internal error has occurred in cache backend. Please check https://www.githubstatus.com/ for any ongoing issue in actions.");
+    logWarning("An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions.");
     return false;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;
