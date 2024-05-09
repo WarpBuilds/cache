@@ -286,6 +286,19 @@ jobs:
 
 </details>
 
+## Running inside a container
+
+To use WarpCache inside a container, you need to pass the `WARPBUILD_RUNNER_VERIFICATION_TOKEN` environment variable as shown below. This is required to authenticate the action with the WarpBuild service.
+
+```yaml
+test-proxy-save:
+  runs-on: warp-ubuntu-latest-x64-16x
+    container:
+      image: ubuntu:latest
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
+```
+
 ## Known practices and workarounds
 
 There are a number of community practices/workarounds to fulfill specific requirements. You may choose to use them if they suit your use case. Note these are not necessarily the only solution or even a recommended solution.

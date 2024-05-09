@@ -80,7 +80,7 @@ Otherwise please upgrade to GHES version >= 3.5 and If you are also using Github
     }
 
     logWarning(
-        "An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions."
+        "Authentication token is invalid. Is it running inside a container without the token added? Docs: https://github.com/WarpBuilds/cache?tab=readme-ov-file#running-inside-a-container"
     );
     return false;
 }
