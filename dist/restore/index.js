@@ -43502,7 +43502,7 @@ function isCacheFeatureAvailable() {
 Otherwise please upgrade to GHES version >= 3.5 and If you are also using Github Connect, please unretire the actions/cache namespace before upgrade (see https://docs.github.com/en/enterprise-server@3.5/admin/github-actions/managing-access-to-actions-from-githubcom/enabling-automatic-access-to-githubcom-actions-using-github-connect#automatic-retirement-of-namespaces-for-actions-accessed-on-githubcom)`);
         return false;
     }
-    logWarning("An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions.");
+    logWarning("Authentication token is invalid. Is it running inside a container without the token added? Docs: https://github.com/WarpBuilds/cache?tab=readme-ov-file#running-inside-a-container");
     return false;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;

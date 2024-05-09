@@ -220,7 +220,7 @@ test("isCacheFeatureAvailable for ac disabled on dotcom", () => {
     jest.spyOn(cache, "isFeatureAvailable").mockImplementation(() => false);
 
     const message =
-        "An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions.";
+        "Authentication token is invalid. Is it running inside a container without the token added? Docs: https://github.com/WarpBuilds/cache?tab=readme-ov-file#running-inside-a-container";
     const infoMock = jest.spyOn(core, "info");
 
     try {
