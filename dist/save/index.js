@@ -581,7 +581,11 @@ function downloadCacheSingleThread(provider, archiveLocation, archivePath, gcsTo
                 const oauth2Client = new google_auth_library_1.OAuth2Client();
                 oauth2Client.setCredentials({ access_token: gcsToken });
                 const storage = new storage_1.Storage({
-                    authClient: oauth2Client
+                    authClient: oauth2Client,
+                    retryOptions: {
+                        autoRetry: false,
+                        maxRetries: 1
+                    }
                 });
                 yield (0, downloadUtils_1.downloadCacheGCP)(storage, archiveLocation, archivePath);
                 break;
@@ -1292,7 +1296,6 @@ function downloadCacheGCP(storage, archiveLocation, archivePath) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
-            storage.retryOptions.totalTimeout = 120;
             yield storage.bucket(bucketName).file(objectName).download({
                 destination: archivePath,
                 validation: 'crc32c'
