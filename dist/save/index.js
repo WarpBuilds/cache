@@ -99,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -192,7 +192,20 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                             return undefined;
                         }
                     }
-                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
+                    try {
+                        yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
+                    }
+                    catch (error) {
+                        core.info(`Streaming download failed. Retrying: ${error}`);
+                        // Try to download the cache using the non-streaming method
+                        yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
+                        if (core.isDebug()) {
+                            yield (0, tar_1.listTar)(archivePath, compressionMethod);
+                        }
+                        const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+                        core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+                        yield (0, tar_1.extractTar)(archivePath, compressionMethod);
+                    }
                     core.info('Cache restored successfully');
                     break;
                 }

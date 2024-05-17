@@ -23,7 +23,7 @@
   "author": "WarpBuild",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "npm:github-actions.warp-cache@1.1.3",
+    "@actions/cache": "npm:github-actions.warp-cache@1.1.4",
     "@actions/core": "^1.10.0",
     "@actions/exec": "^1.1.1",
     "@actions/io": "^1.1.2"
