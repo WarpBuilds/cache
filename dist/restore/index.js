@@ -196,7 +196,8 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
                     }
                     catch (error) {
-                        core.info(`Streaming download failed. Retrying with multipart: ${error}`);
+                        core.debug(`Failed to download cache: ${error}`);
+                        core.info(`Streaming download failed. Likely a cloud provider issue. Retrying with multipart download`);
                         // Wait 1 second
                         yield new Promise(resolve => setTimeout(resolve, 1000));
                         // Try to download the cache using the non-streaming method
@@ -204,9 +205,18 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                             yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
                         }
                         catch (error) {
-                            core.info(`Multipart Download failed. Retrying with basic download: ${error}`);
+                            core.debug(`Failed to download cache: ${error}`);
+                            core.info(`Multipart download failed. Likely a cloud provider issue. Retrying with basic download`);
+                            // Wait 1 second
                             yield new Promise(resolve => setTimeout(resolve, 1000));
-                            yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_s = (_r = (_q = cacheEntry.gcs) === null || _q === void 0 ? void 0 : _q.short_lived_token) === null || _r === void 0 ? void 0 : _r.access_token) !== null && _s !== void 0 ? _s : '');
+                            // Try to download the cache using the basic method
+                            try {
+                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_s = (_r = (_q = cacheEntry.gcs) === null || _q === void 0 ? void 0 : _q.short_lived_token) === null || _r === void 0 ? void 0 : _r.access_token) !== null && _s !== void 0 ? _s : '');
+                            }
+                            catch (error) {
+                                core.info('Cache Miss. Failed to download cache.');
+                                return undefined;
+                            }
                         }
                         if (core.isDebug()) {
                             yield (0, tar_1.listTar)(archivePath, compressionMethod);
@@ -1273,7 +1283,6 @@ function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
         }
         catch (error) {
             core.debug(`Failed to download cache: ${error}`);
-            core.error(`Failed to download cache.`);
             throw error;
         }
     });
@@ -1283,6 +1292,7 @@ function downloadCacheGCP(storage, archiveLocation, archivePath) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
+            storage.retryOptions.totalTimeout = 120;
             yield storage.bucket(bucketName).file(objectName).download({
                 destination: archivePath,
                 validation: 'crc32c'
@@ -1290,7 +1300,6 @@ function downloadCacheGCP(storage, archiveLocation, archivePath) {
         }
         catch (error) {
             core.debug(`Failed to download cache: ${error}`);
-            core.error(`Failed to download cache.`);
             throw error;
         }
     });
@@ -1317,7 +1326,6 @@ function downloadCacheStreamingGCP(storage, archiveLocation) {
     }
     catch (error) {
         core.debug(`Failed to download cache: ${error}`);
-        core.error(`Failed to download cache.`);
         throw error;
     }
 }
