@@ -585,8 +585,7 @@ function downloadCacheSingleThread(provider, archiveLocation, archivePath, gcsTo
                     retryOptions: {
                         autoRetry: false,
                         maxRetries: 1
-                    },
-                    timeout: 300
+                    }
                 });
                 yield (0, downloadUtils_1.downloadCacheGCP)(storage, archiveLocation, archivePath);
                 break;
@@ -1296,11 +1295,24 @@ exports.downloadCacheMultipartGCP = downloadCacheMultipartGCP;
 function downloadCacheGCP(storage, archiveLocation, archivePath) {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            const timeoutDuration = 300000; // 5 minutes
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Download timed out')), timeoutDuration));
             const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
-            yield storage.bucket(bucketName).file(objectName).download({
+            const downloadPromise = storage
+                .bucket(bucketName)
+                .file(objectName)
+                .download({
                 destination: archivePath,
                 validation: 'crc32c'
             });
+            try {
+                yield Promise.race([downloadPromise, timeoutPromise]);
+                core.debug(`Download completed for bucket: ${bucketName}, object: ${objectName}`);
+            }
+            catch (error) {
+                core.debug(`Failed to download cache: ${error}`);
+                throw error;
+            }
         }
         catch (error) {
             core.debug(`Failed to download cache: ${error}`);
