@@ -585,7 +585,8 @@ function downloadCacheSingleThread(provider, archiveLocation, archivePath, gcsTo
                     retryOptions: {
                         autoRetry: false,
                         maxRetries: 1
-                    }
+                    },
+                    timeout: 300
                 });
                 yield (0, downloadUtils_1.downloadCacheGCP)(storage, archiveLocation, archivePath);
                 break;
