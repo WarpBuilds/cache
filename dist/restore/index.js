@@ -1238,7 +1238,7 @@ function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
             yield transferManager.downloadFileInChunks(objectName, {
                 destination: archivePath,
                 noReturnData: true,
-                chunkSizeBytes: 1024 * 1024 * 8
+                validation: 'crc32c'
             });
         }
         catch (error) {
