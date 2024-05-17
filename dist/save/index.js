@@ -99,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -196,9 +196,18 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
                     }
                     catch (error) {
-                        core.info(`Streaming download failed. Retrying: ${error}`);
+                        core.info(`Streaming download failed. Retrying with multipart: ${error}`);
+                        // Wait 1 second
+                        yield new Promise(resolve => setTimeout(resolve, 1000));
                         // Try to download the cache using the non-streaming method
-                        yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
+                        try {
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
+                        }
+                        catch (error) {
+                            core.info(`Multipart Download failed. Retrying with basic download: ${error}`);
+                            yield new Promise(resolve => setTimeout(resolve, 1000));
+                            yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_s = (_r = (_q = cacheEntry.gcs) === null || _q === void 0 ? void 0 : _q.short_lived_token) === null || _r === void 0 ? void 0 : _r.access_token) !== null && _s !== void 0 ? _s : '');
+                        }
                         if (core.isDebug()) {
                             yield (0, tar_1.listTar)(archivePath, compressionMethod);
                         }
@@ -387,7 +396,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteCache = exports.saveCache = exports.reserveCache = exports.downloadCacheStreaming = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
+exports.deleteCache = exports.saveCache = exports.reserveCache = exports.downloadCacheStreaming = exports.downloadCacheSingleThread = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const auth_1 = __nccwpck_require__(5526);
@@ -550,6 +559,27 @@ function downloadCache(provider, archiveLocation, archivePath, gcsToken) {
     });
 }
 exports.downloadCache = downloadCache;
+function downloadCacheSingleThread(provider, archiveLocation, archivePath, gcsToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (provider) {
+            case 's3':
+                break;
+            case 'gcs': {
+                if (!gcsToken) {
+                    throw new Error('Unable to download cache from GCS. GCP token is not provided.');
+                }
+                const oauth2Client = new google_auth_library_1.OAuth2Client();
+                oauth2Client.setCredentials({ access_token: gcsToken });
+                const storage = new storage_1.Storage({
+                    authClient: oauth2Client
+                });
+                yield (0, downloadUtils_1.downloadCacheGCP)(storage, archiveLocation, archivePath);
+                break;
+            }
+        }
+    });
+}
+exports.downloadCacheSingleThread = downloadCacheSingleThread;
 function downloadCacheStreaming(provider, archiveLocation, gcsToken) {
     switch (provider) {
         case 's3':
@@ -999,7 +1029,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadCommandPipeForWget = exports.downloadCacheStreamingGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
+exports.getDownloadCommandPipeForWget = exports.downloadCacheStreamingGCP = exports.downloadCacheGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const fs = __importStar(__nccwpck_require__(7147));
@@ -1249,6 +1279,23 @@ function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
     });
 }
 exports.downloadCacheMultipartGCP = downloadCacheMultipartGCP;
+function downloadCacheGCP(storage, archiveLocation, archivePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
+            yield storage.bucket(bucketName).file(objectName).download({
+                destination: archivePath,
+                validation: 'crc32c'
+            });
+        }
+        catch (error) {
+            core.debug(`Failed to download cache: ${error}`);
+            core.error(`Failed to download cache.`);
+            throw error;
+        }
+    });
+}
+exports.downloadCacheGCP = downloadCacheGCP;
 /**
  * Download the cache to a provider writable stream using GCloud SDK
  *
