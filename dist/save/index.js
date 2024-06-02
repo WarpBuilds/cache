@@ -99,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -158,28 +158,6 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         return cacheKey;
                     }
                     const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
-                    /*
-                    * Alternate, Multipart download method for GCS
-                    await cacheHttpClient.downloadCache(
-                      cacheEntry.provider,
-                      archiveLocation,
-                      archivePath,
-                      cacheEntry.gcs?.short_lived_token?.access_token ?? ''
-                    )
-            
-                    if (core.isDebug()) {
-                      await listTar(archivePath, compressionMethod)
-                    }
-            
-                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath)
-                    core.info(
-                      `Cache Size: ~${Math.round(
-                        archiveFileSize / (1024 * 1024)
-                      )} MB (${archiveFileSize} B)`
-                    )
-            
-                    await extractTar(archivePath, compressionMethod)
-                    */
                     // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
                     let readStream;
                     let downloadCommandPipe;
@@ -229,7 +207,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                     break;
                 }
             }
-            return cacheKey;
+            return (_u = (_t = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _t === void 0 ? void 0 : _t.cache_user_given_key) !== null && _u !== void 0 ? _u : cacheKey;
         }
         catch (error) {
             const typedError = error;
@@ -656,7 +634,7 @@ function commitCache(cacheKey, cacheVersion, uploadKey, uploadID, parts) {
     });
 }
 function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3UploadKey, S3NumberOfChunks, S3PreSignedURLs, GCSAuthToken, GCSBucketName, GCSObjectName) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     return __awaiter(this, void 0, void 0, function* () {
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
         core.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
@@ -700,7 +678,8 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                 yield (0, uploadUtils_1.multiPartUploadToGCS)(storage, archivePath, GCSBucketName, GCSObjectName);
                 core.debug('Committing cache');
                 commitCacheResponse = yield commitCache(cacheKey, cacheVersion);
-                cacheKeyResponse = (_f = (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.gcs) === null || _e === void 0 ? void 0 : _e.cache_key) !== null && _f !== void 0 ? _f : '';
+                cacheKeyResponse =
+                    (_j = (_f = (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.cache_entry) === null || _e === void 0 ? void 0 : _e.cache_user_given_key) !== null && _f !== void 0 ? _f : (_h = (_g = commitCacheResponse.result) === null || _g === void 0 ? void 0 : _g.gcs) === null || _h === void 0 ? void 0 : _h.cache_key) !== null && _j !== void 0 ? _j : '';
                 break;
             }
         }
