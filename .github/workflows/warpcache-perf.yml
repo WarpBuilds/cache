@@ -24,8 +24,8 @@ jobs:
       - name: Create a temp directory
         run: mkdir -p temp
       # Uncomment to generate upload test data
-      - name: Generate ${{matrix.size}}MB data from urandom
-        run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
+      # - name: Generate ${{matrix.size}}MB data from urandom
+      #   run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
       # Use this to test single concurrent job performance
       # - name: Sleep
       #   run: sleep ${{ matrix.run }}
