@@ -290,7 +290,7 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             // Calculate number of chunks required. This is only required if backend is S3 as Google Cloud SDK will do it for us
             const uploadOptions = (0, options_1.getUploadOptions)();
             const maxChunkSize = (_a = uploadOptions === null || uploadOptions === void 0 ? void 0 : uploadOptions.uploadChunkSize) !== null && _a !== void 0 ? _a : 32 * 1024 * 1024; // Default 32MB
-            const numberOfChunks = Math.min(Math.floor(archiveFileSize / maxChunkSize), 1);
+            const numberOfChunks = Math.max(Math.floor(archiveFileSize / maxChunkSize), 1);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
             if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
                 core.debug(`Failed to reserve cache: ${reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode}`);
@@ -667,6 +667,7 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                     !S3PreSignedURLs ||
                     !S3UploadId ||
                     !S3UploadKey) {
+                    core.debug(`S3 params are not set. Number of Chunks: ${S3NumberOfChunks}, PreSigned URLs: ${S3PreSignedURLs}, Upload ID: ${S3UploadId}, Upload Key: ${S3UploadKey}`);
                     throw new Error('Unable to upload cache to S3. One of the following required parameters is missing: numberOfChunks, preSignedURLs, uploadId, uploadKey.');
                 }
                 // Number of chunks should match the number of pre-signed URLs
