@@ -37,7 +37,7 @@ If you are using separate jobs to create and save your cache(s) to be reused by 
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -69,7 +69,7 @@ steps:
   - name: Build
     run: /build-parent-module.sh
 
-  - uses: actions/cache/save@v3
+  - uses: WarpBuilds/cache/save@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -82,7 +82,7 @@ steps:
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -109,7 +109,7 @@ To fail if there is no cache hit for the primary key, leave `restore-keys` empty
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache/restore@v3
+  - uses: WarpBuilds/cache/restore@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -124,7 +124,7 @@ steps:
 
 ### Reusing primary key and restored key in the save action
 
-Usually you may want to use the same `key` with both `actions/cache/restore` and `actions/cache/save` actions. To achieve this, use `outputs` from the `restore` action to reuse the same primary key (or the key of the cache that was restored).
+Usually you may want to use the same `key` with both `WarpBuilds/cache/restore` and `WarpBuilds/cache/save` actions. To achieve this, use `outputs` from the `restore` action to reuse the same primary key (or the key of the cache that was restored).
 
 ### Using restore action outputs to make save action behave just like the cache action
 
@@ -132,4 +132,4 @@ The outputs `cache-primary-key` and `cache-matched-key` can be used to check if 
 
 ### Ensuring proper restores and save happen across the actions
 
-It is very important to use the same `key` and `path` that were used by either `actions/cache` or `actions/cache/save` while saving the cache. Learn more about cache key [naming](https://github.com/actions/cache#creating-a-cache-key) and [versioning](https://github.com/actions/cache#cache-version) here.
+It is very important to use the same `key` and `path` that were used by either `WarpBuilds/cache` or `WarpBuilds/cache/save` while saving the cache. Learn more about cache key [naming](https://github.com/actions/cache#creating-a-cache-key) and [versioning](https://github.com/actions/cache#cache-version) here.

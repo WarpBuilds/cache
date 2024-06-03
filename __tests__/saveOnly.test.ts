@@ -43,11 +43,11 @@ beforeAll(() => {
         }
     );
 
-    jest.spyOn(actionUtils, "isExactKeyMatch").mockImplementation(
+    jest.spyOn(actionUtils, "isKeyInCacheKey").mockImplementation(
         (key, cacheResult) => {
             return jest
                 .requireActual("../src/utils/actionUtils")
-                .isExactKeyMatch(key, cacheResult);
+                .isKeyInCacheKey(key, cacheResult);
         }
     );
 
@@ -83,7 +83,7 @@ test("save with valid inputs uploads a cache", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = 4;
+    const cacheId = "4";
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -96,9 +96,7 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        {
-            uploadChunkSize: 4000000
-        },
+        false,
         false
     );
 
@@ -115,7 +113,7 @@ test("save failing logs the warning message", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = -1;
+    const cacheId = "";
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -128,9 +126,7 @@ test("save failing logs the warning message", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        {
-            uploadChunkSize: 4000000
-        },
+        false,
         false
     );
 

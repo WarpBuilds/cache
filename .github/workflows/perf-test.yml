@@ -1,10 +1,7 @@
 name: Performance Test WarpCache
 
 on:
-  push:
-    branches:
-      - main
-      - prajjwal-warp-245
+  workflow_dispatch:
 
 env:
   WARPBUILD_CACHE_URL: 'https://cache.dev.warpbuild.dev'
@@ -41,7 +38,7 @@ jobs:
 
     - name: Cache
       if: matrix.os == 'ubuntu-latest'
-      uses: actions/cache@v4.0.2
+      uses: WarpBuilds/cache@v1
       with:
         path: temp/
         key: test-1GB
