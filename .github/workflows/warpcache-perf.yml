@@ -24,8 +24,8 @@ jobs:
       - name: Create a temp directory
         run: mkdir -p temp
       # Uncomment to generate upload test data
-      # - name: Generate ${{matrix.size}}MB data from urandom
-      #   run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
+      - name: Generate ${{matrix.size}}MB data from urandom
+        run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
       # Use this to test single concurrent job performance
       # - name: Sleep
       #   run: sleep ${{ matrix.run }}
@@ -34,13 +34,13 @@ jobs:
         uses: WarpBuilds/cache@v1
         with:
           path: temp/
-          key: perf-test-${{ matrix.size }}MB-10s
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}-10s
       - name: Cache
         if: matrix.os == 'ubuntu-latest'
         uses: actions/cache@v4.0.2
         with:
           path: temp/
-          key: perf-test-${{ matrix.size }}MB-10s
+          key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}-10s
 
   calculate-median:
     # This script will log the median runtime of WarpCache and Cache steps and their respective Post steps.
