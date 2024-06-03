@@ -99,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -138,7 +138,24 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    yield cacheHttpClient.downloadCache(cacheEntry.provider, (_b = cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url, archivePath);
+                    try {
+                        let readStream;
+                        let downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_b = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url);
+                        yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
+                    }
+                    catch (error) {
+                        core.debug(`Failed to download cache: ${error}`);
+                        core.info(`Streaming download failed. Likely a cloud provider issue. Retrying with multipart download`);
+                        // Wait 1 second
+                        yield new Promise(resolve => setTimeout(resolve, 1000));
+                        try {
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, (_c = cacheEntry.s3) === null || _c === void 0 ? void 0 : _c.pre_signed_url, archivePath);
+                        }
+                        catch (error) {
+                            core.info('Cache Miss. Failed to download cache.');
+                            return undefined;
+                        }
+                    }
                     if (core.isDebug()) {
                         yield (0, tar_1.listTar)(archivePath, compressionMethod);
                     }
@@ -149,23 +166,23 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                     break;
                 }
                 case 'gcs': {
-                    if (!((_c = cacheEntry.gcs) === null || _c === void 0 ? void 0 : _c.cache_key)) {
+                    if (!((_d = cacheEntry.gcs) === null || _d === void 0 ? void 0 : _d.cache_key)) {
                         return undefined;
                     }
-                    cacheKey = (_d = cacheEntry.gcs) === null || _d === void 0 ? void 0 : _d.cache_key;
+                    cacheKey = (_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.cache_key;
                     if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
+                    const archiveLocation = `gs://${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.bucket_name}/${(_g = cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.cache_key}`;
                     // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
                     let readStream;
                     let downloadCommandPipe;
-                    if ((_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.pre_signed_url) {
-                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url);
+                    if ((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url) {
+                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.pre_signed_url);
                     }
                     else {
-                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_l = (_k = (_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.short_lived_token) === null || _k === void 0 ? void 0 : _k.access_token) !== null && _l !== void 0 ? _l : '');
+                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_m = (_l = (_k = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _k === void 0 ? void 0 : _k.short_lived_token) === null || _l === void 0 ? void 0 : _l.access_token) !== null && _m !== void 0 ? _m : '');
                         if (!readStream) {
                             return undefined;
                         }
@@ -180,7 +197,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         yield new Promise(resolve => setTimeout(resolve, 1000));
                         // Try to download the cache using the non-streaming method
                         try {
-                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_q = (_p = (_o = cacheEntry.gcs) === null || _o === void 0 ? void 0 : _o.short_lived_token) === null || _p === void 0 ? void 0 : _p.access_token) !== null && _q !== void 0 ? _q : '');
                         }
                         catch (error) {
                             core.debug(`Failed to download cache: ${error}`);
@@ -189,7 +206,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                             yield new Promise(resolve => setTimeout(resolve, 1000));
                             // Try to download the cache using the basic method
                             try {
-                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_s = (_r = (_q = cacheEntry.gcs) === null || _q === void 0 ? void 0 : _q.short_lived_token) === null || _r === void 0 ? void 0 : _r.access_token) !== null && _s !== void 0 ? _s : '');
+                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_t = (_s = (_r = cacheEntry.gcs) === null || _r === void 0 ? void 0 : _r.short_lived_token) === null || _s === void 0 ? void 0 : _s.access_token) !== null && _t !== void 0 ? _t : '');
                             }
                             catch (error) {
                                 core.info('Cache Miss. Failed to download cache.');
@@ -207,7 +224,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                     break;
                 }
             }
-            return (_u = (_t = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _t === void 0 ? void 0 : _t.cache_user_given_key) !== null && _u !== void 0 ? _u : cacheKey;
+            return (_v = (_u = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _u === void 0 ? void 0 : _u.cache_user_given_key) !== null && _v !== void 0 ? _v : cacheKey;
         }
         catch (error) {
             const typedError = error;
@@ -273,7 +290,7 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             // Calculate number of chunks required. This is only required if backend is S3 as Google Cloud SDK will do it for us
             const uploadOptions = (0, options_1.getUploadOptions)();
             const maxChunkSize = (_a = uploadOptions === null || uploadOptions === void 0 ? void 0 : uploadOptions.uploadChunkSize) !== null && _a !== void 0 ? _a : 32 * 1024 * 1024; // Default 32MB
-            const numberOfChunks = Math.floor(archiveFileSize / maxChunkSize);
+            const numberOfChunks = Math.min(Math.floor(archiveFileSize / maxChunkSize), 1);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
             if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
                 core.debug(`Failed to reserve cache: ${reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode}`);
