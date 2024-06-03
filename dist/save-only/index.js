@@ -127,45 +127,60 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
             }
             archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
             core.debug(`Archive Path: ${archivePath}`);
-            let cacheKey = '';
+            let cacheKey = (_b = (_a = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _a === void 0 ? void 0 : _a.cache_user_given_key) !== null && _b !== void 0 ? _b : primaryKey;
             switch (cacheEntry.provider) {
                 case 's3': {
-                    if (!((_a = cacheEntry.s3) === null || _a === void 0 ? void 0 : _a.pre_signed_url)) {
+                    if (!((_c = cacheEntry.s3) === null || _c === void 0 ? void 0 : _c.pre_signed_url)) {
                         return undefined;
                     }
-                    cacheKey = cacheEntry.s3.pre_signed_url;
                     if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    yield cacheHttpClient.downloadCache(cacheEntry.provider, (_b = cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url, archivePath);
-                    if (core.isDebug()) {
-                        yield (0, tar_1.listTar)(archivePath, compressionMethod);
+                    try {
+                        let readStream;
+                        let downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_d = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.s3) === null || _d === void 0 ? void 0 : _d.pre_signed_url);
+                        yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
                     }
-                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
-                    core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
-                    yield (0, tar_1.extractTar)(archivePath, compressionMethod);
+                    catch (error) {
+                        core.debug(`Failed to download cache: ${error}`);
+                        core.info(`Streaming download failed. Likely a cloud provider issue. Retrying with multipart download`);
+                        // Wait 1 second
+                        yield new Promise(resolve => setTimeout(resolve, 1000));
+                        try {
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, (_e = cacheEntry.s3) === null || _e === void 0 ? void 0 : _e.pre_signed_url, archivePath);
+                        }
+                        catch (error) {
+                            core.info('Cache Miss. Failed to download cache.');
+                            return undefined;
+                        }
+                        if (core.isDebug()) {
+                            yield (0, tar_1.listTar)(archivePath, compressionMethod);
+                        }
+                        const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+                        core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+                        yield (0, tar_1.extractTar)(archivePath, compressionMethod);
+                    }
                     core.info('Cache restored successfully');
                     break;
                 }
                 case 'gcs': {
-                    if (!((_c = cacheEntry.gcs) === null || _c === void 0 ? void 0 : _c.cache_key)) {
+                    if (!((_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key)) {
                         return undefined;
                     }
-                    cacheKey = (_d = cacheEntry.gcs) === null || _d === void 0 ? void 0 : _d.cache_key;
                     if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
+                    const archiveLocation = `gs://${(_g = cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.bucket_name}/${(_h = cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.cache_key}`;
                     // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
                     let readStream;
                     let downloadCommandPipe;
-                    if ((_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.pre_signed_url) {
-                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url);
+                    if ((_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.pre_signed_url) {
+                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_k = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _k === void 0 ? void 0 : _k.pre_signed_url);
                     }
                     else {
-                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_l = (_k = (_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.short_lived_token) === null || _k === void 0 ? void 0 : _k.access_token) !== null && _l !== void 0 ? _l : '');
+                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_o = (_m = (_l = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _l === void 0 ? void 0 : _l.short_lived_token) === null || _m === void 0 ? void 0 : _m.access_token) !== null && _o !== void 0 ? _o : '');
                         if (!readStream) {
                             return undefined;
                         }
@@ -180,7 +195,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                         yield new Promise(resolve => setTimeout(resolve, 1000));
                         // Try to download the cache using the non-streaming method
                         try {
-                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_p = (_o = (_m = cacheEntry.gcs) === null || _m === void 0 ? void 0 : _m.short_lived_token) === null || _o === void 0 ? void 0 : _o.access_token) !== null && _p !== void 0 ? _p : '');
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_r = (_q = (_p = cacheEntry.gcs) === null || _p === void 0 ? void 0 : _p.short_lived_token) === null || _q === void 0 ? void 0 : _q.access_token) !== null && _r !== void 0 ? _r : '');
                         }
                         catch (error) {
                             core.debug(`Failed to download cache: ${error}`);
@@ -189,7 +204,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                             yield new Promise(resolve => setTimeout(resolve, 1000));
                             // Try to download the cache using the basic method
                             try {
-                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_s = (_r = (_q = cacheEntry.gcs) === null || _q === void 0 ? void 0 : _q.short_lived_token) === null || _r === void 0 ? void 0 : _r.access_token) !== null && _s !== void 0 ? _s : '');
+                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_u = (_t = (_s = cacheEntry.gcs) === null || _s === void 0 ? void 0 : _s.short_lived_token) === null || _t === void 0 ? void 0 : _t.access_token) !== null && _u !== void 0 ? _u : '');
                             }
                             catch (error) {
                                 core.info('Cache Miss. Failed to download cache.');
@@ -207,7 +222,7 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                     break;
                 }
             }
-            return (_u = (_t = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _t === void 0 ? void 0 : _t.cache_user_given_key) !== null && _u !== void 0 ? _u : cacheKey;
+            return cacheKey;
         }
         catch (error) {
             const typedError = error;
@@ -273,7 +288,7 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             // Calculate number of chunks required. This is only required if backend is S3 as Google Cloud SDK will do it for us
             const uploadOptions = (0, options_1.getUploadOptions)();
             const maxChunkSize = (_a = uploadOptions === null || uploadOptions === void 0 ? void 0 : uploadOptions.uploadChunkSize) !== null && _a !== void 0 ? _a : 32 * 1024 * 1024; // Default 32MB
-            const numberOfChunks = Math.floor(archiveFileSize / maxChunkSize);
+            const numberOfChunks = Math.max(Math.floor(archiveFileSize / maxChunkSize), 1);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
             if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
                 core.debug(`Failed to reserve cache: ${reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode}`);
@@ -650,6 +665,7 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                     !S3PreSignedURLs ||
                     !S3UploadId ||
                     !S3UploadKey) {
+                    core.debug(`S3 params are not set. Number of Chunks: ${S3NumberOfChunks}, PreSigned URLs: ${S3PreSignedURLs}, Upload ID: ${S3UploadId}, Upload Key: ${S3UploadKey}`);
                     throw new Error('Unable to upload cache to S3. One of the following required parameters is missing: numberOfChunks, preSignedURLs, uploadId, uploadKey.');
                 }
                 // Number of chunks should match the number of pre-signed URLs
