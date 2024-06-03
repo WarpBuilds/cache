@@ -10,7 +10,7 @@ jobs:
   perf-test:
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-arm64-4x, ubuntu-latest]
+        os: [warpdev-ubuntu-latest-arm64-4x, ubuntu-latest]
         # Size is given in MB
         size: [500]
         # Use run to test single job performance across multiple runs
@@ -30,7 +30,7 @@ jobs:
       # - name: Sleep
       #   run: sleep ${{ matrix.run }}
       - name: WarpCache
-        if: matrix.os == 'warp-ubuntu-latest-arm64-4x'
+        if: matrix.os == 'warpdev-ubuntu-latest-arm64-4x'
         uses: WarpBuilds/cache@v1
         with:
           path: temp/
@@ -44,7 +44,7 @@ jobs:
 
   calculate-median:
     # This script will log the median runtime of WarpCache and Cache steps and their respective Post steps.
-    runs-on: warp-ubuntu-latest-arm64-4x
+    runs-on: warpdev-ubuntu-latest-arm64-4x
     needs: perf-test
     steps:
       - name: Checkout
