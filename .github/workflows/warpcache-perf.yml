@@ -40,7 +40,7 @@ jobs:
           key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}-10s
       - name: Cache
         if: matrix.os == 'ubuntu-latest'
-        uses: actions/cache@v4.0.2
+        uses: actions/cache@v4
         with:
           path: temp/
           key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}-10s
