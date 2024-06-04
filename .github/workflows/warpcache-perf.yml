@@ -34,7 +34,7 @@ jobs:
       #   run: sleep ${{ matrix.run }}
       - name: WarpCache
         if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
-        uses: WarpBuilds/cache@v1
+        uses: WarpBuilds/cache@v1.1.10-beta.1
         with:
           path: temp/
           key: perf-test-${{ matrix.size }}MB-${{ matrix.jobs }}-10s
