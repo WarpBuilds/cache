@@ -15,7 +15,7 @@ jobs:
       matrix:
         os: [warpdev-ubuntu-latest-arm64-4x, ubuntu-latest]
         # Size is given in MB
-        size: [500]
+        size: [5000]
         # Use run to test single job performance across multiple runs
         # run: [10, 20, 30, 40, 50, 60, 70, 80, 90]
         # Use jobs to test multiple concurrent jobs performance
@@ -28,7 +28,7 @@ jobs:
         run: mkdir -p temp
       # Uncomment to generate upload test data
       - name: Generate ${{matrix.size}}MB data from urandom
-        run: dd if=/dev/urandom of=temp/500MB bs=1M count=${{ matrix.size }}
+        run: dd if=/dev/urandom of=temp/${{matrix.size}}MB bs=1M count=${{ matrix.size }}
       # Use this to test single concurrent job performance
       # - name: Sleep
       #   run: sleep ${{ matrix.run }}
