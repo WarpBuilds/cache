@@ -1,6 +1,6 @@
 {
   "name": "cache",
-  "version": "4.0.2",
+  "version": "1.1.11",
   "private": true,
   "description": "Cache dependencies and build outputs",
   "main": "dist/restore/index.js",
@@ -18,9 +18,11 @@
   "keywords": [
     "actions",
     "node",
-    "cache"
+    "cache",
+    "warpcache",
+    "warpbuild"
   ],
-  "author": "GitHub",
+  "author": "WarpBuild",
   "license": "MIT",
   "dependencies": {
     "@actions/cache": "npm:github-actions.warp-cache@1.1.3",
