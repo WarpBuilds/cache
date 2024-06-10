@@ -1,0 +1,46 @@
+---
+name: gtoken
+version: 7.1.0
+type: npm
+summary: Node.js Google Authentication Service Account Tokens
+homepage:
+license: mit
+licenses:
+- sources: LICENSE
+  text: |
+    The MIT License (MIT)
+
+    Copyright (c) 2014 Ryan Seys
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
+- sources: README.md
+  text: |-
+    [MIT](https://github.com/googleapis/node-gtoken/blob/main/LICENSE)
+
+    [codecov-image]: https://codecov.io/gh/googleapis/node-gtoken/branch/main/graph/badge.svg
+    [codecov-url]: https://codecov.io/gh/googleapis/node-gtoken
+    [gdevconsole]: https://console.developers.google.com
+    [gts-image]: https://img.shields.io/badge/code%20style-google-blueviolet.svg
+    [gts-url]: https://www.npmjs.com/package/gts
+    [npm-image]: https://img.shields.io/npm/v/gtoken.svg
+    [npm-url]: https://npmjs.org/package/gtoken
+    [snyk-image]: https://snyk.io/test/github/googleapis/node-gtoken/badge.svg
+    [snyk-url]: https://snyk.io/test/github/googleapis/node-gtoken
+    [client-docs]: https://googleapis.dev/nodejs/gtoken/latest/
+notices: []

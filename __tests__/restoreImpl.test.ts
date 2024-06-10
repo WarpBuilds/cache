@@ -10,10 +10,10 @@ import * as testUtils from "../src/utils/testUtils";
 jest.mock("../src/utils/actionUtils");
 
 beforeAll(() => {
-    jest.spyOn(actionUtils, "isExactKeyMatch").mockImplementation(
+    jest.spyOn(actionUtils, "isKeyInCacheKey").mockImplementation(
         (key, cacheResult) => {
             const actualUtils = jest.requireActual("../src/utils/actionUtils");
-            return actualUtils.isExactKeyMatch(key, cacheResult);
+            return actualUtils.isKeyInCacheKey(key, cacheResult);
         }
     );
 
@@ -130,6 +130,7 @@ test("restore on GHES with AC available ", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
 
@@ -184,6 +185,7 @@ test("restore with too many keys should fail", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -210,6 +212,7 @@ test("restore with large key should fail", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -236,6 +239,7 @@ test("restore with invalid key should fail", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -271,6 +275,7 @@ test("restore with no cache found", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
 
@@ -312,6 +317,7 @@ test("restore with restore keys and no cache found", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
 
@@ -352,6 +358,7 @@ test("restore with cache found for key", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
 
@@ -394,6 +401,7 @@ test("restore with cache found for restore key", async () => {
         {
             lookupOnly: false
         },
+        false,
         false
     );
 
@@ -435,6 +443,7 @@ test("restore with lookup-only set", async () => {
         {
             lookupOnly: true
         },
+        false,
         false
     );
 

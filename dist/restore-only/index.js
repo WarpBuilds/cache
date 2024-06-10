@@ -99,7 +99,7 @@ exports.isFeatureAvailable = isFeatureAvailable;
  * @returns string returns the key for the cache hit, otherwise returns undefined
  */
 function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArchive = false, enableCrossArchArchive = false) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t;
     return __awaiter(this, void 0, void 0, function* () {
         checkPaths(paths);
         checkKey(primaryKey);
@@ -127,18 +127,23 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
             }
             archivePath = path.join(yield utils.createTempDirectory(), utils.getCacheFileName(compressionMethod));
             core.debug(`Archive Path: ${archivePath}`);
-            let cacheKey = '';
+            let cacheKey = (_b = (_a = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _a === void 0 ? void 0 : _a.cache_user_given_key) !== null && _b !== void 0 ? _b : primaryKey;
             switch (cacheEntry.provider) {
                 case 's3': {
-                    if (!((_a = cacheEntry.s3) === null || _a === void 0 ? void 0 : _a.pre_signed_url)) {
+                    if (!((_c = cacheEntry.s3) === null || _c === void 0 ? void 0 : _c.pre_signed_url)) {
                         return undefined;
                     }
-                    cacheKey = cacheEntry.s3.pre_signed_url;
                     if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    yield cacheHttpClient.downloadCache(cacheEntry.provider, (_b = cacheEntry.s3) === null || _b === void 0 ? void 0 : _b.pre_signed_url, archivePath);
+                    try {
+                        yield cacheHttpClient.downloadCache(cacheEntry.provider, (_d = cacheEntry.s3) === null || _d === void 0 ? void 0 : _d.pre_signed_url, archivePath);
+                    }
+                    catch (error) {
+                        core.info('Cache Miss. Failed to download cache.');
+                        return undefined;
+                    }
                     if (core.isDebug()) {
                         yield (0, tar_1.listTar)(archivePath, compressionMethod);
                     }
@@ -149,50 +154,59 @@ function restoreCache(paths, primaryKey, restoreKeys, options, enableCrossOsArch
                     break;
                 }
                 case 'gcs': {
-                    if (!((_c = cacheEntry.gcs) === null || _c === void 0 ? void 0 : _c.cache_key)) {
+                    if (!((_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.cache_key)) {
                         return undefined;
                     }
-                    cacheKey = (_d = cacheEntry.gcs) === null || _d === void 0 ? void 0 : _d.cache_key;
                     if (options === null || options === void 0 ? void 0 : options.lookupOnly) {
                         core.info('Lookup only - skipping download');
                         return cacheKey;
                     }
-                    const archiveLocation = `gs://${(_e = cacheEntry.gcs) === null || _e === void 0 ? void 0 : _e.bucket_name}/${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.cache_key}`;
-                    /*
-                    * Alternate, Multipart download method for GCS
-                    await cacheHttpClient.downloadCache(
-                      cacheEntry.provider,
-                      archiveLocation,
-                      archivePath,
-                      cacheEntry.gcs?.short_lived_token?.access_token ?? ''
-                    )
-            
-                    if (core.isDebug()) {
-                      await listTar(archivePath, compressionMethod)
-                    }
-            
-                    const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath)
-                    core.info(
-                      `Cache Size: ~${Math.round(
-                        archiveFileSize / (1024 * 1024)
-                      )} MB (${archiveFileSize} B)`
-                    )
-            
-                    await extractTar(archivePath, compressionMethod)
-                    */
+                    const archiveLocation = `gs://${(_f = cacheEntry.gcs) === null || _f === void 0 ? void 0 : _f.bucket_name}/${(_g = cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.cache_key}`;
                     // For GCS, we do a streaming download which means that we extract the archive while we are downloading it.
                     let readStream;
                     let downloadCommandPipe;
-                    if ((_g = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _g === void 0 ? void 0 : _g.pre_signed_url) {
-                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url);
+                    if ((_h = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _h === void 0 ? void 0 : _h.pre_signed_url) {
+                        downloadCommandPipe = (0, downloadUtils_1.getDownloadCommandPipeForWget)((_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.pre_signed_url);
                     }
                     else {
-                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_l = (_k = (_j = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _j === void 0 ? void 0 : _j.short_lived_token) === null || _k === void 0 ? void 0 : _k.access_token) !== null && _l !== void 0 ? _l : '');
+                        readStream = cacheHttpClient.downloadCacheStreaming('gcs', archiveLocation, (_m = (_l = (_k = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.gcs) === null || _k === void 0 ? void 0 : _k.short_lived_token) === null || _l === void 0 ? void 0 : _l.access_token) !== null && _m !== void 0 ? _m : '');
                         if (!readStream) {
                             return undefined;
                         }
                     }
-                    yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
+                    try {
+                        yield (0, tar_1.extractStreamingTar)(readStream, archivePath, compressionMethod, downloadCommandPipe);
+                    }
+                    catch (error) {
+                        core.debug(`Failed to download cache: ${error}`);
+                        core.info(`Streaming download failed. Likely a cloud provider issue. Retrying with multipart download`);
+                        // Wait 1 second
+                        yield new Promise(resolve => setTimeout(resolve, 1000));
+                        // Try to download the cache using the non-streaming method
+                        try {
+                            yield cacheHttpClient.downloadCache(cacheEntry.provider, archiveLocation, archivePath, (_q = (_p = (_o = cacheEntry.gcs) === null || _o === void 0 ? void 0 : _o.short_lived_token) === null || _p === void 0 ? void 0 : _p.access_token) !== null && _q !== void 0 ? _q : '');
+                        }
+                        catch (error) {
+                            core.debug(`Failed to download cache: ${error}`);
+                            core.info(`Multipart download failed. Likely a cloud provider issue. Retrying with basic download`);
+                            // Wait 1 second
+                            yield new Promise(resolve => setTimeout(resolve, 1000));
+                            // Try to download the cache using the basic method
+                            try {
+                                yield cacheHttpClient.downloadCacheSingleThread(cacheEntry.provider, archiveLocation, archivePath, (_t = (_s = (_r = cacheEntry.gcs) === null || _r === void 0 ? void 0 : _r.short_lived_token) === null || _s === void 0 ? void 0 : _s.access_token) !== null && _t !== void 0 ? _t : '');
+                            }
+                            catch (error) {
+                                core.info('Cache Miss. Failed to download cache.');
+                                return undefined;
+                            }
+                        }
+                        if (core.isDebug()) {
+                            yield (0, tar_1.listTar)(archivePath, compressionMethod);
+                        }
+                        const archiveFileSize = utils.getArchiveFileSizeInBytes(archivePath);
+                        core.info(`Cache Size: ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B)`);
+                        yield (0, tar_1.extractTar)(archivePath, compressionMethod);
+                    }
                     core.info('Cache restored successfully');
                     break;
                 }
@@ -263,7 +277,7 @@ function saveCache(paths, key, enableCrossOsArchive = false, enableCrossArchArch
             // Calculate number of chunks required. This is only required if backend is S3 as Google Cloud SDK will do it for us
             const uploadOptions = (0, options_1.getUploadOptions)();
             const maxChunkSize = (_a = uploadOptions === null || uploadOptions === void 0 ? void 0 : uploadOptions.uploadChunkSize) !== null && _a !== void 0 ? _a : 32 * 1024 * 1024; // Default 32MB
-            const numberOfChunks = Math.floor(archiveFileSize / maxChunkSize);
+            const numberOfChunks = Math.max(Math.floor(archiveFileSize / maxChunkSize), 1);
             const reserveCacheResponse = yield cacheHttpClient.reserveCache(key, numberOfChunks, cacheVersion);
             if (!(0, requestUtils_1.isSuccessStatusCode)(reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode)) {
                 core.debug(`Failed to reserve cache: ${reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode}`);
@@ -373,13 +387,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.deleteCache = exports.saveCache = exports.reserveCache = exports.downloadCacheStreaming = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
+exports.deleteCache = exports.saveCache = exports.reserveCache = exports.downloadCacheStreaming = exports.downloadCacheSingleThread = exports.downloadCache = exports.getCacheEntry = exports.getCacheVersion = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const auth_1 = __nccwpck_require__(5526);
 const crypto = __importStar(__nccwpck_require__(6113));
 const utils = __importStar(__nccwpck_require__(1518));
+const os_1 = __importDefault(__nccwpck_require__(2037));
 const downloadUtils_1 = __nccwpck_require__(5500);
 const requestUtils_1 = __nccwpck_require__(3981);
 const storage_1 = __nccwpck_require__(7577);
@@ -519,7 +537,10 @@ function downloadCache(provider, archiveLocation, archivePath, gcsToken) {
     return __awaiter(this, void 0, void 0, function* () {
         switch (provider) {
             case 's3':
-                yield (0, downloadUtils_1.downloadCacheMultiConnection)(archiveLocation, archivePath, 8);
+                {
+                    const numberOfConnections = 2 + os_1.default.cpus().length;
+                    yield (0, downloadUtils_1.downloadCacheMultiConnection)(archiveLocation, archivePath, Math.min(numberOfConnections, 30));
+                }
                 break;
             case 'gcs': {
                 if (!gcsToken) {
@@ -537,6 +558,31 @@ function downloadCache(provider, archiveLocation, archivePath, gcsToken) {
     });
 }
 exports.downloadCache = downloadCache;
+function downloadCacheSingleThread(provider, archiveLocation, archivePath, gcsToken) {
+    return __awaiter(this, void 0, void 0, function* () {
+        switch (provider) {
+            case 's3':
+                break;
+            case 'gcs': {
+                if (!gcsToken) {
+                    throw new Error('Unable to download cache from GCS. GCP token is not provided.');
+                }
+                const oauth2Client = new google_auth_library_1.OAuth2Client();
+                oauth2Client.setCredentials({ access_token: gcsToken });
+                const storage = new storage_1.Storage({
+                    authClient: oauth2Client,
+                    retryOptions: {
+                        autoRetry: false,
+                        maxRetries: 1
+                    }
+                });
+                yield (0, downloadUtils_1.downloadCacheGCP)(storage, archiveLocation, archivePath);
+                break;
+            }
+        }
+    });
+}
+exports.downloadCacheSingleThread = downloadCacheSingleThread;
 function downloadCacheStreaming(provider, archiveLocation, gcsToken) {
     switch (provider) {
         case 's3':
@@ -599,7 +645,7 @@ function commitCache(cacheKey, cacheVersion, uploadKey, uploadID, parts) {
     });
 }
 function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3UploadKey, S3NumberOfChunks, S3PreSignedURLs, GCSAuthToken, GCSBucketName, GCSObjectName) {
-    var _a, _b, _c, _d, _e, _f;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
     return __awaiter(this, void 0, void 0, function* () {
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
         core.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
@@ -615,6 +661,7 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                     !S3PreSignedURLs ||
                     !S3UploadId ||
                     !S3UploadKey) {
+                    core.debug(`S3 params are not set. Number of Chunks: ${S3NumberOfChunks}, PreSigned URLs: ${S3PreSignedURLs}, Upload ID: ${S3UploadId}, Upload Key: ${S3UploadKey}`);
                     throw new Error('Unable to upload cache to S3. One of the following required parameters is missing: numberOfChunks, preSignedURLs, uploadId, uploadKey.');
                 }
                 // Number of chunks should match the number of pre-signed URLs
@@ -643,7 +690,8 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                 yield (0, uploadUtils_1.multiPartUploadToGCS)(storage, archivePath, GCSBucketName, GCSObjectName);
                 core.debug('Committing cache');
                 commitCacheResponse = yield commitCache(cacheKey, cacheVersion);
-                cacheKeyResponse = (_f = (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.gcs) === null || _e === void 0 ? void 0 : _e.cache_key) !== null && _f !== void 0 ? _f : '';
+                cacheKeyResponse =
+                    (_j = (_f = (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.cache_entry) === null || _e === void 0 ? void 0 : _e.cache_user_given_key) !== null && _f !== void 0 ? _f : (_h = (_g = commitCacheResponse.result) === null || _g === void 0 ? void 0 : _g.gcs) === null || _h === void 0 ? void 0 : _h.cache_key) !== null && _j !== void 0 ? _j : '';
                 break;
             }
         }
@@ -986,7 +1034,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getDownloadCommandPipeForWget = exports.downloadCacheStreamingGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
+exports.getDownloadCommandPipeForWget = exports.downloadCacheStreamingGCP = exports.downloadCacheGCP = exports.downloadCacheMultipartGCP = exports.downloadCacheMultiConnection = exports.downloadCacheHttpClient = exports.DownloadProgress = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const http_client_1 = __nccwpck_require__(6255);
 const fs = __importStar(__nccwpck_require__(7147));
@@ -1225,17 +1273,45 @@ function downloadCacheMultipartGCP(storage, archiveLocation, archivePath) {
             yield transferManager.downloadFileInChunks(objectName, {
                 destination: archivePath,
                 noReturnData: true,
-                chunkSizeBytes: 1024 * 1024 * 8
+                validation: 'crc32c'
             });
         }
         catch (error) {
             core.debug(`Failed to download cache: ${error}`);
-            core.error(`Failed to download cache.`);
             throw error;
         }
     });
 }
 exports.downloadCacheMultipartGCP = downloadCacheMultipartGCP;
+function downloadCacheGCP(storage, archiveLocation, archivePath) {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const timeoutDuration = 300000; // 5 minutes
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Download timed out')), timeoutDuration));
+            const { bucketName, objectName } = utils.retrieveGCSBucketAndObjectName(archiveLocation);
+            const downloadPromise = storage
+                .bucket(bucketName)
+                .file(objectName)
+                .download({
+                destination: archivePath,
+                validation: 'crc32c'
+            });
+            try {
+                yield Promise.race([downloadPromise, timeoutPromise]);
+                core.debug(`Download completed for bucket: ${bucketName}, object: ${objectName}`);
+            }
+            catch (error) {
+                core.debug(`Failed to download cache: ${error}`);
+                throw error;
+            }
+        }
+        catch (error) {
+            core.debug(`Failed to download cache: ${error}`);
+            throw error;
+        }
+    });
+}
+exports.downloadCacheGCP = downloadCacheGCP;
 /**
  * Download the cache to a provider writable stream using GCloud SDK
  *
@@ -1257,7 +1333,6 @@ function downloadCacheStreamingGCP(storage, archiveLocation) {
     }
     catch (error) {
         core.debug(`Failed to download cache: ${error}`);
-        core.error(`Failed to download cache.`);
         throw error;
     }
 }
@@ -1790,16 +1865,30 @@ function extractStreamingTar(stream, archivePath, compressionMethod, downloadCom
             throw new Error('At least two processes should be present as the archive is compressed at least twice.');
         }
         return new Promise((resolve, reject) => {
+            const handleStreamError = (stream, commandName) => {
+                stream.on('error', error => {
+                    reject(new Error(`Error in ${commandName}: ${error.message}`));
+                });
+            };
+            // Attach error handlers and pipe the streams
+            commandPipes.forEach(commandPipe => {
+                handleStreamError(commandPipe.stdin, commandPipe.spawnfile);
+                handleStreamError(commandPipe.stdout, commandPipe.spawnfile);
+                handleStreamError(commandPipe.stderr, commandPipe.spawnfile);
+                commandPipe.stderr.on('data', data => {
+                    reject(new Error(`Error in ${commandPipe.spawnfile}: ${data.toString()}`));
+                });
+            });
             if (stream) {
-                stream.pipe(commandPipes[0].stdin);
+                stream.pipe(commandPipes[0].stdin).on('error', error => {
+                    reject(new Error(`Error piping to ${commandPipes[0].spawnfile}: ${error.message}`));
+                });
             }
             for (let i = 0; i < commandPipes.length - 1; i++) {
-                commandPipes[i].stdout.pipe(commandPipes[i + 1].stdin);
-                commandPipes[i].stderr.on('data', data => {
-                    reject(new Error(`Error in ${commandPipes[i].spawnfile}: ${data.toString()}`));
-                });
-                commandPipes[i].on('error', error => {
-                    reject(new Error(`Error in ${commandPipes[i].spawnfile}: ${error.message}`));
+                commandPipes[i].stdout
+                    .pipe(commandPipes[i + 1].stdin)
+                    .on('error', error => {
+                    reject(new Error(`Error piping between ${commandPipes[i].spawnfile} and ${commandPipes[i + 1].spawnfile}: ${error.message}`));
                 });
             }
             const lastCommand = commandPipes[commandPipes.length - 1];
@@ -1814,6 +1903,9 @@ function extractStreamingTar(stream, archivePath, compressionMethod, downloadCom
                 else {
                     reject(new Error(`Last command exited with code ${code}`));
                 }
+            });
+            lastCommand.on('error', error => {
+                reject(new Error(`Error in ${lastCommand.spawnfile}: ${error.message}`));
             });
         });
     });
@@ -43541,7 +43633,7 @@ function isCacheFeatureAvailable() {
 Otherwise please upgrade to GHES version >= 3.5 and If you are also using Github Connect, please unretire the actions/cache namespace before upgrade (see https://docs.github.com/en/enterprise-server@3.5/admin/github-actions/managing-access-to-actions-from-githubcom/enabling-automatic-access-to-githubcom-actions-using-github-connect#automatic-retirement-of-namespaces-for-actions-accessed-on-githubcom)`);
         return false;
     }
-    logWarning("An internal error has occurred in cache backend. Please check https://status.warpbuild.com/ for any ongoing issue in actions.");
+    logWarning("Authentication token is invalid. Is it running inside a container without the token added? Docs: https://github.com/WarpBuilds/cache?tab=readme-ov-file#running-inside-a-container");
     return false;
 }
 exports.isCacheFeatureAvailable = isCacheFeatureAvailable;

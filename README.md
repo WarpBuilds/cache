@@ -3,52 +3,34 @@
 This action allows caching dependencies and build outputs to improve workflow execution time.
 
 >Two other actions are available in addition to the primary `cache` action:
+>
 >* [Restore action](./restore/README.md)
 >* [Save action](./save/README.md)
 
-[![Tests](https://github.com/actions/cache/actions/workflows/workflow.yml/badge.svg)](https://github.com/actions/cache/actions/workflows/workflow.yml)
+[![Tests](https://github.com/WarpBuilds/cache/actions/workflows/workflow.yml/badge.svg)](https://github.com/WarpBuilds/cache/actions/workflows/workflow.yml)
 
 ## Documentation
 
-See ["Caching dependencies to speed up workflows"](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows).
+WarpCache is a performant drop-in replacement to GitHub's actions/cache. See Performance comparison @ [WarpBuild Docs](https://docs.warpbuild.com/cache#performance)
+
+For more information on how to leverage caching in GitHub workflows, see ["Caching dependencies to speed up workflows"](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows).
 
 ## What's New
 
-### v4
+### v1
 
-* Updated to node 20
-* Added a `save-always` flag to save the cache even if a prior step fails
-
-### v3
-
-* Added support for caching in GHES 3.5+.
-* Fixed download issue for files > 2GB during restore.
-* Updated the minimum runner version support from node 12 -> node 16.
-* Fixed avoiding empty cache save when no files are available for caching.
-* Fixed tar creation error while trying to create tar with path as `~/` home folder on `ubuntu-latest`.
-* Fixed zstd failing on amazon linux 2.0 runners.
-* Fixed cache not working with github workspace directory or current directory.
-* Fixed the download stuck problem by introducing a timeout of 1 hour for cache downloads.
-* Fix zstd not working for windows on gnu tar in issues.
-* Allowing users to provide a custom timeout as input for aborting download of a cache segment using an environment variable `SEGMENT_DOWNLOAD_TIMEOUT_MINS`. Default is 10 minutes.
-* New actions are available for granular control over caches - [restore](restore/action.yml) and [save](save/action.yml).
-* Support cross-os caching as an opt-in feature. See [Cross OS caching](./tips-and-workarounds.md#cross-os-cache) for more info.
-* Added option to fail job on cache miss. See [Exit workflow on cache miss](./restore/README.md#exit-workflow-on-cache-miss) for more info.
-* Fix zstd not being used after zstd version upgrade to 1.5.4 on hosted runners
-* Added option to lookup cache without downloading it.
-* Reduced segment size to 128MB and segment timeout to 10 minutes to fail fast in case the cache download is stuck.
-
-See the [v2 README.md](https://github.com/actions/cache/blob/v2/README.md) for older updates.
+* Provides feature parity with GitHub's `actions/cache` v4.
+* Provides unlimited cache for a repo.
+* Supports `enableCrossArchArchive` to allow runners to save or restore caches that can be restored or saved respectively on runners of other architectures.
+* Allows `delete-cache` input to delete the cache from the action directly.
 
 ## Usage
 
 ### Pre-requisites
 
+WarpCache will only work when used with WarpBuild's Runners. Sign up @ [https://www.warpbuild.com/](https://www.warpbuild.com/).
+
 Create a workflow `.yml` file in your repository's `.github/workflows` directory. An [example workflow](#example-cache-workflow) is available below. For more information, see the GitHub Help Documentation for [Creating a workflow file](https://help.github.com/en/articles/configuring-a-workflow#creating-a-workflow-file).
-
-If you are using this inside a container, a POSIX-compliant `tar` needs to be included and accessible from the execution path.
-
-If you are using a `self-hosted` Windows runner, `GNU tar` and `zstd` are required for [Cross-OS caching](https://github.com/actions/cache/blob/main/tips-and-workarounds.md#cross-os-cache) to work. They are also recommended to be installed in general so the performance is on par with `hosted` Windows runners.
 
 ### Inputs
 
@@ -59,6 +41,7 @@ If you are using a `self-hosted` Windows runner, `GNU tar` and `zstd` are requir
 * `enableCrossArchArchive` - An optional boolean when enabled, allows runners to save or restore caches that can be restored or saved respectively on runners of other architectures. Default: `false`
 * `fail-on-cache-miss` - Fail the workflow if cache entry is not found. Default: `false`
 * `lookup-only` - If true, only checks if cache entry exists and skips download. Does not change save cache behavior. Default: `false`
+* `delete-cache` - If true, deletes the cache entry. Skips restore and save. Default: `false`
 
 #### Environment Variables
 
@@ -74,7 +57,7 @@ See [Skipping steps based on cache-hit](#skipping-steps-based-on-cache-hit) for 
 
 ### Cache scopes
 
-The cache is scoped to the key, [version](#cache-version), and branch. The default branch cache is available to other branches.
+The cache is scoped to the key, [version](#cache-version), and branch.
 
 See [Matching a cache key](https://help.github.com/en/actions/configuring-and-managing-workflows/caching-dependencies-to-speed-up-workflows#matching-a-cache-key) for more info.
 
@@ -89,14 +72,14 @@ on: push
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Cache Primes
       id: cache-primes
-      uses: actions/cache@v4
+      uses: WarpBuilds/cache@v1
       with:
         path: prime-numbers
         key: ${{ runner.os }}-primes
@@ -120,14 +103,14 @@ on: push
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
 
     steps:
     - uses: actions/checkout@v3
 
     - name: Restore cached Primes
       id: cache-primes-restore
-      uses: actions/cache/restore@v4
+      uses: WarpBuilds/cache/restore@v1
       with:
         path: |
           path/to/dependencies
@@ -138,7 +121,7 @@ jobs:
     .
     - name: Save Primes
       id: cache-primes-save
-      uses: actions/cache/save@v4
+      uses: WarpBuilds/cache/save@v1
       with:
         path: |
           path/to/dependencies
@@ -157,7 +140,7 @@ With the introduction of the `restore` and `save` actions, a lot of caching use 
 
 Every programming language and framework has its own way of caching.
 
-See [Examples](examples.md) for a list of `actions/cache` implementations for use with:
+See [Examples](examples.md) for a list of `WarpBuilds/cache` implementations for use with:
 
 * [C# - NuGet](./examples.md#c---nuget)
 * [Clojure - Lein Deps](./examples.md#clojure---lein-deps)
@@ -192,7 +175,7 @@ A cache key can include any of the contexts, functions, literals, and operators 
 For example, using the [`hashFiles`](https://docs.github.com/en/actions/learn-github-actions/expressions#hashfiles) function allows you to create a new cache when dependencies change.
 
 ```yaml
-  - uses: actions/cache@v4
+  - uses: WarpBuilds/cache@v1
     with:
       path: |
         path/to/dependencies
@@ -210,7 +193,7 @@ Additionally, you can use arbitrary command output in a cache key, such as a dat
       echo "date=$(/bin/date -u "+%Y%m%d")" >> $GITHUB_OUTPUT
     shell: bash
 
-  - uses: actions/cache@v4
+  - uses: WarpBuilds/cache@v1
     with:
       path: path/to/dependencies
       key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-${{ hashFiles('**/lockfiles') }}
@@ -232,7 +215,7 @@ Example:
 steps:
   - uses: actions/checkout@v3
 
-  - uses: actions/cache@v4
+  - uses: WarpBuilds/cache@v1
     id: cache
     with:
       path: path/to/dependencies
@@ -243,28 +226,28 @@ steps:
     run: /install.sh
 ```
 
-> **Note** The `id` defined in `actions/cache` must match the `id` in the `if` statement (i.e. `steps.[ID].outputs.cache-hit`)
+> **Note** The `id` defined in `WarpBuilds/cache` must match the `id` in the `if` statement (i.e. `steps.[ID].outputs.cache-hit`)
 
 ## Cache Version
 
-Cache version is a hash [generated](https://github.com/actions/toolkit/blob/500d0b42fee2552ae9eeb5933091fe2fbf14e72d/packages/cache/src/internal/cacheHttpClient.ts#L73-L90) for a combination of compression tool used (Gzip, Zstd, etc. based on the runner OS) and the `path` of directories being cached. If two caches have different versions, they are identified as unique caches while matching. This, for example, means that a cache created on a `windows-latest` runner can't be restored on `ubuntu-latest` as cache `Version`s are different.
+Cache version is a hash [generated](https://github.com/actions/toolkit/blob/500d0b42fee2552ae9eeb5933091fe2fbf14e72d/packages/cache/src/internal/cacheHttpClient.ts#L73-L90) for a combination of compression tool used (Gzip, Zstd, etc. based on the runner OS) and the `path` of directories being cached. If two caches have different versions, they are identified as unique caches while matching. This, for example, means that a cache created on a `warp-macos-14-arm64-6x` runner can't be restored on `warp-ubuntu-latest-x64-4x` as cache `Version`s are different.
 
 > Pro tip: The [list caches](https://docs.github.com/en/rest/actions/cache#list-github-actions-caches-for-a-repository) API can be used to get the version of a cache. This can be helpful to troubleshoot cache miss due to version.
 
 <details>
   <summary>Example</summary>
-The workflow will create 3 unique caches with same keys. Ubuntu and windows runners will use different compression technique and hence create two different caches. And `build-linux` will create two different caches as the `paths` are different.
+The workflow will create 3 unique caches with same keys. Ubuntu and mac runners will use different compression technique and hence create two different caches. And `build-linux` will create two different caches as the `paths` are different.
 
 ```yaml
 jobs:
   build-linux:
-    runs-on: ubuntu-latest
+    runs-on: warp-ubuntu-latest-x64-4x
     steps:
       - uses: actions/checkout@v3
 
       - name: Cache Primes
         id: cache-primes
-        uses: actions/cache@v4
+        uses: WarpBuilds/cache@v1
         with:
           path: prime-numbers
           key: primes
@@ -275,7 +258,7 @@ jobs:
 
       - name: Cache Numbers
         id: cache-numbers
-        uses: actions/cache@v4
+        uses: WarpBuilds/cache@v1
         with:
           path: numbers
           key: primes
@@ -284,14 +267,14 @@ jobs:
         if: steps.cache-numbers.outputs.cache-hit != 'true'
         run: ./generate-primes.sh -d numbers
 
-  build-windows:
-    runs-on: windows-latest
+  build-mac:
+    runs-on: warp-macos-14-arm64-6x
     steps:
       - uses: actions/checkout@v3
 
       - name: Cache Primes
         id: cache-primes
-        uses: actions/cache@v4
+        uses: WarpBuilds/cache@v1
         with:
           path: prime-numbers
           key: primes
@@ -303,6 +286,21 @@ jobs:
 
 </details>
 
+## Running inside a container
+
+To use WarpCache inside a container, pass the `WARPBUILD_RUNNER_VERIFICATION_TOKEN` environment variable to the container as shown below. This environment variable is always present in WarpBuild runners and is used to authenticate the action with the WarpBuild service.
+
+Note: Ensure that `wget` is installed in the container, as it is used by the action to download the cache. See [our workflow file](https://github.com/WarpBuilds/cache/blob/main/.github/workflows/workflow.yml#L109) for an example.
+
+```yaml
+test-proxy-save:
+  runs-on: warp-ubuntu-latest-x64-16x
+    container:
+      image: ubuntu:latest
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
+```
+
 ## Known practices and workarounds
 
 There are a number of community practices/workarounds to fulfill specific requirements. You may choose to use them if they suit your use case. Note these are not necessarily the only solution or even a recommended solution.
@@ -311,7 +309,8 @@ There are a number of community practices/workarounds to fulfill specific requir
 * [Update a cache](./tips-and-workarounds.md#update-a-cache)
 * [Use cache across feature branches](./tips-and-workarounds.md#use-cache-across-feature-branches)
 * [Cross OS cache](./tips-and-workarounds.md#cross-os-cache)
-* [Force deletion of caches overriding default cache eviction policy](./tips-and-workarounds.md#force-deletion-of-caches-overriding-default-cache-eviction-policy)
+* [Cross Arch cache](./tips-and-workarounds.md#cross-arch-cache)
+* [Deletion of Caches](./tips-and-workarounds.md#deletion-of-caches)
 
 ### Windows environment variables
 
@@ -320,6 +319,10 @@ Please note that Windows environment variables (like `%LocalAppData%`) will NOT 
 ## Contributing
 
 We would love for you to contribute to `actions/cache`. Pull requests are welcome! Please see the [CONTRIBUTING.md](CONTRIBUTING.md) for more information.
+
+## Attribution
+
+A big thank you to the GitHub team for their amazing work on the [actions/cache](https://github.com/actions/cache).
 
 ## License
 

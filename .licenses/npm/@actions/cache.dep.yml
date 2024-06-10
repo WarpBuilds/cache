@@ -1,9 +1,9 @@
 ---
 name: "@actions/cache"
-version: 3.2.4
+version: 1.1.16
 type: npm
-summary: Actions cache lib
-homepage: https://github.com/actions/toolkit/tree/main/packages/cache
+summary: Github action to use WarpBuild's in-house cache offering
+homepage: https://github.com/WarpBuilds/toolkit/tree/main/packages/warp-cache
 license: mit
 licenses:
 - sources: LICENSE.md
