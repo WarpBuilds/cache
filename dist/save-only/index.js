@@ -645,7 +645,7 @@ function commitCache(cacheKey, cacheVersion, uploadKey, uploadID, parts) {
     });
 }
 function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3UploadKey, S3NumberOfChunks, S3PreSignedURLs, GCSAuthToken, GCSBucketName, GCSObjectName) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
     return __awaiter(this, void 0, void 0, function* () {
         const cacheSize = utils.getArchiveFileSizeInBytes(archivePath);
         core.info(`Cache Size: ~${Math.round(cacheSize / (1024 * 1024))} MB (${cacheSize} B)`);
@@ -674,7 +674,8 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                 completedParts.sort((a, b) => a.PartNumber - b.PartNumber);
                 core.debug('Committing cache');
                 commitCacheResponse = yield commitCache(cacheKey, cacheVersion, S3UploadKey, S3UploadId, completedParts);
-                cacheKeyResponse = (_c = (_b = (_a = commitCacheResponse.result) === null || _a === void 0 ? void 0 : _a.s3) === null || _b === void 0 ? void 0 : _b.cache_key) !== null && _c !== void 0 ? _c : '';
+                cacheKeyResponse =
+                    (_f = (_c = (_b = (_a = commitCacheResponse.result) === null || _a === void 0 ? void 0 : _a.cache_entry) === null || _b === void 0 ? void 0 : _b.cache_user_given_key) !== null && _c !== void 0 ? _c : (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.s3) === null || _e === void 0 ? void 0 : _e.cache_key) !== null && _f !== void 0 ? _f : '';
                 break;
             }
             case 'gcs': {
@@ -691,7 +692,7 @@ function saveCache(provider, cacheKey, cacheVersion, archivePath, S3UploadId, S3
                 core.debug('Committing cache');
                 commitCacheResponse = yield commitCache(cacheKey, cacheVersion);
                 cacheKeyResponse =
-                    (_j = (_f = (_e = (_d = commitCacheResponse.result) === null || _d === void 0 ? void 0 : _d.cache_entry) === null || _e === void 0 ? void 0 : _e.cache_user_given_key) !== null && _f !== void 0 ? _f : (_h = (_g = commitCacheResponse.result) === null || _g === void 0 ? void 0 : _g.gcs) === null || _h === void 0 ? void 0 : _h.cache_key) !== null && _j !== void 0 ? _j : '';
+                    (_m = (_j = (_h = (_g = commitCacheResponse.result) === null || _g === void 0 ? void 0 : _g.cache_entry) === null || _h === void 0 ? void 0 : _h.cache_user_given_key) !== null && _j !== void 0 ? _j : (_l = (_k = commitCacheResponse.result) === null || _k === void 0 ? void 0 : _k.gcs) === null || _l === void 0 ? void 0 : _l.cache_key) !== null && _m !== void 0 ? _m : '';
                 break;
             }
         }

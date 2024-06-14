@@ -81,6 +81,54 @@ jobs:
       shell: bash
       run: __tests__/verify-cache-files.sh ${{ runner.os }} ~/test-cache
 
+  test-save-only:
+    strategy:
+      matrix:
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Generate files in working directory
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} test-cache
+    - name: Generate files outside working directory
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} ~/test-cache
+    - name: Save cache
+      uses: ./save/
+      with:
+        key: test-save-only-${{ runner.os }}-${{ github.run_id }}
+        path: |
+          test-cache
+          ~/test-cache
+
+  test-restore-only:
+    needs: test-save-only
+    strategy:
+      matrix:
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+    - name: Restore cache
+      uses: ./restore/
+      with:
+        key: test-save-only-${{ runner.os }}-${{ github.run_id }}
+        path: |
+          test-cache
+          ~/test-cache
+    - name: Verify cache files in working directory
+      shell: bash
+      run: __tests__/verify-cache-files.sh ${{ runner.os }} test-cache
+    - name: Verify cache files outside working directory
+      shell: bash
+      run: __tests__/verify-cache-files.sh ${{ runner.os }} ~/test-cache
+
+
   # End to end with proxy
   test-proxy-save:
     runs-on: warp-ubuntu-latest-x64-16x
