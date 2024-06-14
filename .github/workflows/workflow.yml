@@ -97,7 +97,7 @@ jobs:
       shell: bash
       run: __tests__/create-cache-files.sh ${{ runner.os }} ~/test-cache
     - name: Save cache
-      uses: ./
+      uses: ./save/
       with:
         key: test-save-only-${{ runner.os }}-${{ github.run_id }}
         path: |
