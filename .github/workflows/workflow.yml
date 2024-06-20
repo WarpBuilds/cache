@@ -198,7 +198,7 @@ jobs:
     - name: Save cache
       uses: ./
       with:
-        key: test-save-main-branch
+        key: test-save-default-branch
         path: |
           test-cache
           ~/test-cache
@@ -210,9 +210,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Restore cache
-      uses: ./
+      uses: ./restore/
       with:
-        key: test-save-main-branch
+        key: test-save-default-branch
         path: |
           test-cache
           ~/test-cache
