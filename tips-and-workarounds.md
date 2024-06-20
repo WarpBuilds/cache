@@ -28,6 +28,8 @@ Reusing cache across feature branches is not allowed today to provide cache isol
 
 Matching cache keys for restores follows the same rules as GitHub Actions Cache which are documented [here](https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#restrictions-for-accessing-a-cache).
 
+Note: Cache restores are not allowed across organizations.
+
 ## Cross OS cache
 
 WarpCache is cross-os compatible when `enableCrossOsArchive` input is passed as true. This means that a cache created on `warp-ubuntu-latest-x64-4x` can be used by `warp-macos-14-arm64-6x` and vice versa, provided the workflow which runs on `warp-macos-14-arm64-6x` have input `enableCrossOsArchive` as true. This is useful to cache dependencies which are independent of the runner platform. This will help reduce the consumption of the cache quota and help build for multiple platforms from the same cache. Things to keep in mind while using this feature:
