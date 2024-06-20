@@ -69832,7 +69832,7 @@ function restoreImpl(stateProvider, earlyExit) {
             // Store the matched cache key in states
             stateProvider.setState(constants_1.State.CacheMatchedKey, cacheKey);
             // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
-            const isExactKeyMatch = utils.isKeyInCacheKey(core.getInput(constants_1.Inputs.Key, { required: true }), cacheKey);
+            const isExactKeyMatch = utils.isExactKeyMatch(core.getInput(constants_1.Inputs.Key, { required: true }), cacheKey);
             core.setOutput(constants_1.Outputs.CacheHit, isExactKeyMatch.toString());
             if (lookupOnly) {
                 core.info(`Cache found and can be restored from key: ${cacheKey}`);

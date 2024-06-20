@@ -69821,7 +69821,7 @@ function saveImpl(stateProvider) {
             // If matched restore key is same as primary key, then do not save cache
             // NO-OP in case of SaveOnly action
             const restoredKey = stateProvider.getCacheState();
-            if (utils.isKeyInCacheKey(primaryKey, restoredKey)) {
+            if (utils.isExactKeyMatch(primaryKey, restoredKey)) {
                 core.info(`Cache hit occurred on the primary key ${primaryKey}, not saving cache.`);
                 return;
             }
