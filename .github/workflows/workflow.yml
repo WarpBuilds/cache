@@ -213,3 +213,6 @@ jobs:
       uses: ./
       with:
         key: test-save-main-branch
+        path: |
+          test-cache
+          ~/test-cache
