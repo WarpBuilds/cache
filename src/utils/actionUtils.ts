@@ -11,6 +11,7 @@ export function isGhes(): boolean {
 }
 
 export function isExactKeyMatch(key: string, cacheKey?: string): boolean {
+    console.log("isExactKeyMatch", key, cacheKey);
     return !!(
         cacheKey &&
         cacheKey.localeCompare(key, undefined, {

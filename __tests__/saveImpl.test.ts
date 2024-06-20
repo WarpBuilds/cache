@@ -40,6 +40,13 @@ beforeAll(() => {
         }
     );
 
+    jest.spyOn(actionUtils, "isExactKeyMatch").mockImplementation(
+        (key, cacheResult) => {
+            const actualUtils = jest.requireActual("../src/utils/actionUtils");
+            return actualUtils.isExactKeyMatch(key, cacheResult);
+        }
+    );
+
     jest.spyOn(actionUtils, "isKeyInCacheKey").mockImplementation(
         (key, cacheResult) => {
             return jest
