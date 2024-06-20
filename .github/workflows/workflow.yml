@@ -22,7 +22,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Setup Node.js 20.x
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@v4
       with:
         node-version: 20.x
         cache: npm
@@ -181,3 +181,35 @@ jobs:
         path: test-cache
     - name: Verify cache
       run: __tests__/verify-cache-files.sh proxy test-cache
+
+  # The two tests below are used to test the save and restore from the default branch of a repo.
+  save-or-restore-main-branch:
+    if: github.ref == 'refs/heads/main'
+    runs-on: warp-ubuntu-latest-x64-4x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Generate files in working directory
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} test-cache
+    - name: Generate files outside working directory
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} ~/test-cache
+    - name: Save cache
+      uses: ./
+      with:
+        key: test-save-main-branch
+        path: |
+          test-cache
+          ~/test-cache
+
+  test-restore-from-default-branch:
+    if: github.ref != 'refs/heads/main'
+    runs-on: warp-ubuntu-latest-x64-4x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Restore cache
+      uses: ./
+      with:
+        key: test-save-main-branch
