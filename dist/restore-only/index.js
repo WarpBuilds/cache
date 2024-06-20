@@ -69832,6 +69832,7 @@ function restoreImpl(stateProvider, earlyExit) {
             // Store the matched cache key in states
             stateProvider.setState(constants_1.State.CacheMatchedKey, cacheKey);
             // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
+            console.log(utils);
             const isExactKeyMatch = utils.isExactKeyMatch(core.getInput(constants_1.Inputs.Key, { required: true }), cacheKey);
             core.setOutput(constants_1.Outputs.CacheHit, isExactKeyMatch.toString());
             if (lookupOnly) {
@@ -69994,6 +69995,7 @@ function isGhes() {
 }
 exports.isGhes = isGhes;
 function isExactKeyMatch(key, cacheKey) {
+    console.log("isExactKeyMatch", key, cacheKey);
     return !!(cacheKey &&
         cacheKey.localeCompare(key, undefined, {
             sensitivity: "accent"
