@@ -477,7 +477,7 @@ function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false,
 }
 exports.getCacheVersion = getCacheVersion;
 function getCacheEntry(key, restoreKeys, paths, options) {
-    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+    var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
     return __awaiter(this, void 0, void 0, function* () {
         const httpClient = createHttpClient();
         const version = getCacheVersion(paths, options === null || options === void 0 ? void 0 : options.compressionMethod, options === null || options === void 0 ? void 0 : options.enableCrossOsArchive, options === null || options === void 0 ? void 0 : options.enableCrossArchArchive);
@@ -487,11 +487,15 @@ function getCacheEntry(key, restoreKeys, paths, options) {
             case 'pull_request':
                 {
                     const pullPayload = github.context.payload;
+                    // Adds PR head branch and base branch to restoreBranches
                     restoreBranches.push(`refs/heads/${(_b = (_a = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _a === void 0 ? void 0 : _a.head) === null || _b === void 0 ? void 0 : _b.ref}`);
+                    restoreBranches.push(`refs/heads/${(_d = (_c = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _c === void 0 ? void 0 : _c.base) === null || _d === void 0 ? void 0 : _d.ref}`);
+                    // Adds default branch to restoreBranches
+                    restoreBranches.push(`refs/heads/${(_e = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.repository) === null || _e === void 0 ? void 0 : _e.default_branch}`);
                     // If head points to a different repository, add it to restoreRepos. We allow restores from head repos as well.
-                    if (((_e = (_d = (_c = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _c === void 0 ? void 0 : _c.head) === null || _d === void 0 ? void 0 : _d.repo) === null || _e === void 0 ? void 0 : _e.name) !==
-                        ((_f = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.repository) === null || _f === void 0 ? void 0 : _f.name)) {
-                        restoreRepos.push((_j = (_h = (_g = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _g === void 0 ? void 0 : _g.head) === null || _h === void 0 ? void 0 : _h.repo) === null || _j === void 0 ? void 0 : _j.name);
+                    if (((_h = (_g = (_f = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _f === void 0 ? void 0 : _f.head) === null || _g === void 0 ? void 0 : _g.repo) === null || _h === void 0 ? void 0 : _h.name) !==
+                        ((_j = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.repository) === null || _j === void 0 ? void 0 : _j.name)) {
+                        restoreRepos.push((_m = (_l = (_k = pullPayload === null || pullPayload === void 0 ? void 0 : pullPayload.pull_request) === null || _k === void 0 ? void 0 : _k.head) === null || _l === void 0 ? void 0 : _l.repo) === null || _m === void 0 ? void 0 : _m.name);
                     }
                 }
                 break;
@@ -501,7 +505,7 @@ function getCacheEntry(key, restoreKeys, paths, options) {
                     const pushPayload = github.context.payload;
                     // Default branch is not in the complete format
                     // Ref: https://docs.github.com/en/developers/webhooks-and-events/webhooks/webhook-events-and-payloads#push
-                    restoreBranches.push(`refs/heads/${(_k = pushPayload === null || pushPayload === void 0 ? void 0 : pushPayload.repository) === null || _k === void 0 ? void 0 : _k.default_branch}`);
+                    restoreBranches.push(`refs/heads/${(_o = pushPayload === null || pushPayload === void 0 ? void 0 : pushPayload.repository) === null || _o === void 0 ? void 0 : _o.default_branch}`);
                 }
                 break;
             default:
