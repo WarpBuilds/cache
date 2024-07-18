@@ -467,6 +467,10 @@ function getCacheVersion(paths, compressionMethod, enableCrossOsArchive = false,
     if (process.platform === 'win32' && !enableCrossOsArchive) {
         components.push('windows-only');
     }
+    // Check for mac platforms if enableCrossOsArchive is false
+    if (process.platform === 'darwin' && !enableCrossOsArchive) {
+        components.push('mac-only');
+    }
     // Add architecture to cache version
     if (!enableCrossArchArchive) {
         components.push(process.arch);
@@ -2003,6 +2007,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.multiPartUploadToGCS = exports.uploadFileToS3 = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const utils = __importStar(__nccwpck_require__(1518));
+const os = __importStar(__nccwpck_require__(2037));
 const fs_1 = __importDefault(__nccwpck_require__(7147));
 const axios_1 = __importDefault(__nccwpck_require__(8757));
 const storage_1 = __nccwpck_require__(7577);
@@ -2015,7 +2020,7 @@ function getContentRange(start, end) {
     return `bytes ${start}-${end}/*`;
 }
 function uploadChunk(resourceUrl, openStream, partNumber, start, end) {
-    var _a;
+    var _a, _b;
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Uploading chunk of size ${end - start + 1} bytes at offset ${start} with content range: ${getContentRange(start, end)}`);
         // Manually convert the readable stream to a buffer. S3 doesn't allow stream as input
@@ -2036,7 +2041,7 @@ function uploadChunk(resourceUrl, openStream, partNumber, start, end) {
             };
         }
         catch (error) {
-            throw new Error(`Cache service responded with ${error.status} during upload chunk.`);
+            throw new Error(`Cache service responded with ${(_b = error.response) === null || _b === void 0 ? void 0 : _b.status} during upload chunk.`);
         }
     });
 }
@@ -2044,26 +2049,39 @@ function uploadFileToS3(preSignedURLs, archivePath) {
     return __awaiter(this, void 0, void 0, function* () {
         const fileSize = utils.getArchiveFileSizeInBytes(archivePath);
         const numberOfChunks = preSignedURLs.length;
+        let concurrency = 4;
+        // Adjust concurrency based on the number of cpu cores
+        if (os.cpus().length > 4) {
+            concurrency = 8;
+        }
         const fd = fs_1.default.openSync(archivePath, 'r');
-        core.debug('Awaiting all uploads');
+        core.debug(`Awaiting all uploads with concurrency limit of ${concurrency}`);
         let offset = 0;
+        const completedParts = [];
         try {
-            const completedParts = yield Promise.all(preSignedURLs.map((presignedURL, index) => __awaiter(this, void 0, void 0, function* () {
-                const chunkSize = Math.ceil(fileSize / numberOfChunks);
-                const start = offset;
-                const end = offset + chunkSize - 1;
-                offset += chunkSize;
-                return yield uploadChunk(presignedURL, () => fs_1.default
-                    .createReadStream(archivePath, {
-                    fd,
-                    start,
-                    end,
-                    autoClose: false
-                })
-                    .on('error', error => {
-                    throw new Error(`Cache upload failed because file read failed with ${error.message}`);
-                }), index + 1, start, end);
-            })));
+            for (let i = 0; i < numberOfChunks; i += concurrency) {
+                const batch = preSignedURLs
+                    .slice(i, i + concurrency)
+                    .map((presignedURL, index) => {
+                    const chunkIndex = i + index;
+                    const chunkSize = Math.ceil(fileSize / numberOfChunks);
+                    const start = offset;
+                    const end = offset + chunkSize - 1;
+                    offset += chunkSize;
+                    return uploadChunk(presignedURL, () => fs_1.default
+                        .createReadStream(archivePath, {
+                        fd,
+                        start,
+                        end,
+                        autoClose: false
+                    })
+                        .on('error', error => {
+                        throw new Error(`Cache upload failed because file read failed with ${error.message}`);
+                    }), chunkIndex + 1, start, end);
+                });
+                const batchResults = yield Promise.all(batch);
+                completedParts.push(...batchResults);
+            }
             return completedParts;
         }
         finally {
