@@ -1,6 +1,6 @@
 ---
 name: "@actions/cache"
-version: 1.2.2
+version: 1.2.5
 type: npm
 summary: Github action to use WarpBuild's in-house cache offering
 homepage: https://github.com/WarpBuilds/toolkit/tree/main/packages/warp-cache
