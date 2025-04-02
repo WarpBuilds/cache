@@ -19,9 +19,12 @@ For more information on how to leverage caching in GitHub workflows, see ["Cachi
 
 ### v1
 
+> Note: Using versions older than v1.4.5 might cause issues with cache saves and restores for some customers.
+
 * Provides feature parity with GitHub's `actions/cache` v4.
 * Provides unlimited cache for a repo.
 * Supports `enableCrossArchArchive` to allow runners to save or restore caches that can be restored or saved respectively on runners of other architectures.
+* Supports `enableCrossOsArchive` to allow runners to save or restore caches that can be restored or saved respectively on other operating systems.
 * Allows `delete-cache` input to delete the cache from the action directly.
 
 ## Usage
