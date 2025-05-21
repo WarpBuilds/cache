@@ -1,0 +1,86 @@
+name: Tests
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - squid-proxy-test
+
+
+jobs:
+ # End to end with proxy
+  test-proxy-save:
+    runs-on: warp-ubuntu-latest-x64-4x
+    container:
+      image: ubuntu:latest
+      options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
+    services:
+      squid-proxy:
+        image: ubuntu/squid:latest
+        ports:
+          - 3128:3128
+    env:
+      https_proxy: http://squid-proxy:3128
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Generate files
+        run: __tests__/create-cache-files.sh proxy test-cache
+      - name: Save cache
+        uses: WarpBuilds/cache@v1
+        with:
+          key: test-proxy-${{ github.run_id }}
+          path: test-cache
+  test-proxy-restore:
+    needs: test-proxy-save
+    runs-on: warp-ubuntu-latest-x64-4x
+    container:
+      image: ubuntu:latest
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
+    services:
+      squid-proxy:
+        image: ubuntu/squid:latest
+        ports:
+          - 3128:3128
+    env:
+      https_proxy: http://squid-proxy:3128
+    steps:
+      # Wget is required by the WarpBuild Cache Action
+      - name: Install wget
+        run: apt-get update && apt-get install -y wget
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Restore cache
+        uses: WarpBuilds/cache@v1
+        with:
+          key: test-proxy-${{ github.run_id }}
+          path: test-cache
+          fail-on-cache-miss: true
+      - name: Verify cache
+        run: __tests__/verify-cache-files.sh proxy test-cache
+
+  test-proxy-delete:
+    needs: test-proxy-restore
+    runs-on: warp-ubuntu-latest-x64-4x
+    container:
+      image: ubuntu:latest
+      options: --dns 127.0.0.1
+      env:
+        WARPBUILD_RUNNER_VERIFICATION_TOKEN: ${{ env.WARPBUILD_RUNNER_VERIFICATION_TOKEN }}
+    services:
+      squid-proxy:
+        image: ubuntu/squid:latest
+        ports:
+          - 3128:3128
+    env:
+      https_proxy: http://squid-proxy:3128
+    steps:
+      - name: Delete cache
+        uses: WarpBuilds/cache@v1
+        with:
+          key: test-proxy-${{ github.run_id }}
+          path: test-cache
+          delete-cache: true
