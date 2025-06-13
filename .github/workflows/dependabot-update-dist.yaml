@@ -13,14 +13,19 @@ jobs:
               uses: actions/checkout@v4
               with:
                   persist-credentials: true # so we can push
+                  fetch-depth: 0 # get all commits and tags
+                  fetch-tags: true # ensure tags are fetched too
             - name: Set up Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: "18"
-            - name: Install dependencies
-              run: CI=false npm install --include=dev
             - name: Build
-              run: CI=false npm run build
+              env:
+                  CI: "" # empty string → falsy in JS
+                  GITHUB_ACTIONS: ""
+              run: |
+                  npm install --include=dev
+                  npm run build
             - name: Commit updated dist
               run: |
                   git config user.name "github-actions[bot]"
