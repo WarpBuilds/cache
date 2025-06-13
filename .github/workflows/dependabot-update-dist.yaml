@@ -1,18 +1,12 @@
 name: Build and commit dist on Dependabot PR
 
 on:
-    pull_request:
-        # only run when Dependabot opens or updates the PR
-        types: [opened, synchronize]
-        branches:
-            - main
     push:
         branches:
-            - dependabot/npm_and_yarn/octokit/request-8.4.1
+            - dependabot/**
 
 jobs:
     build-and-commit:
-        if: github.actor == 'dependabot[bot]'
         runs-on: ubuntu-latest
         steps:
             - name: Check out code
