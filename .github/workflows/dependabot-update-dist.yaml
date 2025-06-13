@@ -1,0 +1,36 @@
+name: Build and commit dist on Dependabot PR
+
+on:
+    push:
+        branches:
+            - dependabot/**
+
+jobs:
+    build-and-commit:
+        runs-on: warp-ubuntu-latest-x64-2x
+        steps:
+            - name: Check out code
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: true # so we can push
+                  fetch-depth: 0 # get all commits and tags
+                  fetch-tags: true # ensure tags are fetched too
+            - name: Set up Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "18"
+            - name: Build
+              env:
+                  CI: "" # empty string → falsy in JS
+                  GITHUB_ACTIONS: ""
+              run: |
+                  npm install --include=dev
+                  npm run build
+            # - uses: mxschmitt/action-tmate@v3
+            - name: Commit updated dist
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add .
+                  git commit -m "build: update dist" || true
+                  git push
