@@ -7,7 +7,7 @@ on:
 
 jobs:
     build-and-commit:
-        runs-on: ubuntu-latest
+        runs-on: warp-ubuntu-latest-x64-2x
         steps:
             - name: Check out code
               uses: actions/checkout@v4
