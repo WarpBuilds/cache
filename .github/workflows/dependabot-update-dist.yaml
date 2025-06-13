@@ -7,6 +7,7 @@ on:
 
 jobs:
     build-and-commit:
+        if: false
         runs-on: warp-ubuntu-latest-x64-2x
         steps:
             - name: Check out code
@@ -26,11 +27,23 @@ jobs:
               run: |
                   npm install --include=dev
                   npm run build
+            - name: Create GitHub App Token
+              uses: actions/create-github-app-token@v1
+              id: app-token
+              with:
+                  app-id: ${{ vars.WARPERBOT_APP_ID }}
+                  private-key: ${{ secrets.WARPERBOT_PRIVATE_KEY }}
+                  repositories: "cache"
             # - uses: mxschmitt/action-tmate@v3
             - name: Commit updated dist
+              env:
+                  WARPERBOT_SLUG: ${{ vars.WARPERBOT_SLUG }}
+                  WARPERBOT_EMAIL: ${{ vars.WARPERBOT_EMAIL }}
+                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
               run: |
-                  git config user.name "github-actions[bot]"
-                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git config --global user.name "$WARPERBOT_SLUG[bot]"
+                  git config --global user.email "$WARPERBOT_EMAIL"
+                  git remote set-url origin $(git config remote.origin.url | sed "s/github.com/${WARPERBOT_SLUG}:${GH_TOKEN}@github.com/g")
                   git add .
                   git commit -m "build: update dist" || true
                   git push
