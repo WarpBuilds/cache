@@ -18,7 +18,7 @@ jobs:
               with:
                   node-version: "18"
             - name: Install dependencies
-              run: npm install --dev
+              run: CI=false npm install --include=dev
             - name: Build
               run: CI=false npm run build
             - name: Commit updated dist
