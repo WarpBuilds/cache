@@ -1,5 +1,6 @@
 # Examples
 
+- [Bun](#bun)
 - [C# - NuGet](#c---nuget)
 - [Clojure - Lein Deps](#clojure---lein-deps)
 - [D - DUB](#d---dub)
@@ -41,6 +42,26 @@
 - [Swift - Mint](#swift---mint)
 - [* - Bazel](#---bazel)
 
+## Bun
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: |
+      ~/.bun/install/cache
+    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+```
+
+### Windows
+
+```yaml
+- uses: actions/cache@v4
+  with:
+    path: |
+      ~\.bun
+    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+```
+
 ## C# - NuGet
 
 Using [NuGet lock files](https://docs.microsoft.com/nuget/consume-packages/package-references-in-project-files#locking-dependencies):
@@ -55,7 +76,7 @@ Using [NuGet lock files](https://docs.microsoft.com/nuget/consume-packages/packa
 ```
 
 Depending on the environment, huge packages might be pre-installed in the global cache folder.
-With `WarpBuilds/cache@v1
+With `WarpBuilds/cache@v1` you can now exclude unwanted packages with [exclude pattern](https://github.com/actions/toolkit/tree/main/packages/glob#exclude-patterns)
 
 ```yaml
 - uses: WarpBuilds/cache@v1
@@ -512,6 +533,7 @@ jobs:
 ```yaml
 - name: Get pip cache dir
   id: pip-cache
+  shell: bash
   run: |
     echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
 
