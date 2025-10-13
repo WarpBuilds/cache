@@ -81,7 +81,7 @@ On similar lines, commit sha can be used to create a very specialized and short 
       key: cache-${{ github.sha }}
 ```
 
-### Using multiple factors while forming a key depening on the need
+### Using multiple factors while forming a key depending on the need
 
 Cache key can be formed by combination of more than one metadata, evaluated info.
 
@@ -102,7 +102,7 @@ The [GitHub Context](https://docs.github.com/en/actions/learn-github-actions/con
 
 While setting paths for caching dependencies it is important to give correct path depending on the hosted runner you are using or whether the action is running in a container job. Assigning different `path` for save and restore will result in cache miss.
 
-Below are GiHub hosted runner specific paths one should take care of when writing a workflow which saves/restores caches across OS.
+Below are GitHub hosted runner specific paths one should take care of when writing a workflow which saves/restores caches across OS.
 
 #### Ubuntu Paths
 
@@ -146,7 +146,7 @@ In case you are using a centralized job to create and save your cache that can b
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - uses: WarpBuilds/cache/restore@v1
     id: cache
@@ -171,7 +171,7 @@ You can use the output of this action to exit the workflow on cache miss. This w
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - uses: WarpBuilds/cache/restore@v1
     id: cache
@@ -243,24 +243,7 @@ with:
 
 ### Saving cache even if the build fails
 
-There can be cases where a cache should be saved even if the build job fails. For example, a job can fail due to flaky tests but the caches can still be re-used. You can use `WarpBuilds/cache/save` action to save the cache by using `if: always()` condition.
-
-Similarly, `WarpBuilds/cache/save` action can be conditionally used based on the output of the previous steps. This way you get more control on when to save the cache.
-
-```yaml
-steps:
-  - uses: actions/checkout@v3
-  .
-  . // restore if need be
-  .
-  - name: Build
-    run: /build.sh
-  - uses: WarpBuilds/cache/save@v1
-    if: always() // or any other condition to invoke the save action
-    with:
-      path: path/to/dependencies
-      key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
-```
+See [Always save cache](./save/README.md#always-save-cache).
 
 ### Saving cache once and reusing in multiple workflows
 
@@ -270,7 +253,7 @@ In case of multi-module projects, where the built artifact of one project needs 
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - name: Build
     run: ./build-parent-module.sh
@@ -286,7 +269,7 @@ steps:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v3
+  - uses: actions/checkout@v4
 
   - uses: WarpBuilds/cache/restore@v1
     id: cache
