@@ -15,6 +15,10 @@ inputs:
     description: 'An optional boolean when enabled, allows windows runners to restore caches that were saved on other platforms'
     default: 'false'
     required: false
+  enableCrossArchArchive:
+    description: 'An optional boolean when enabled, allows runners of different architectures to restore caches that were saved on other architectures'
+    default: 'false'
+    required: false
   fail-on-cache-miss:
     description: 'Fail the workflow if cache entry is not found'
     default: 'false'

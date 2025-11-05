@@ -15,6 +15,10 @@ inputs:
     description: 'An optional boolean when enabled, allows windows runners to save caches that can be restored on other platforms'
     default: 'false'
     required: false
+  enableCrossArchArchive:
+    description: 'An optional boolean when enabled, allows runners of different architectures to save caches that can be restored on other architectures'
+    default: 'false'
+    required: false
 runs:
   using: 'node20'
   main: '../dist/save-only/index.js'
