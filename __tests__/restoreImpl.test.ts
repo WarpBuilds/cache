@@ -467,6 +467,47 @@ test("restore with lookup-only set", async () => {
     expect(failedMock).toHaveBeenCalledTimes(0);
 });
 
+test("restore with enableCrossArchArchive set", async () => {
+    const path = "node_modules";
+    const key = "node-test";
+    testUtils.setInputs({
+        path: path,
+        key,
+        enableCrossArchArchive: true
+    });
+
+    const infoMock = jest.spyOn(core, "info");
+    const failedMock = jest.spyOn(core, "setFailed");
+    const stateMock = jest.spyOn(core, "saveState");
+    const setCacheHitOutputMock = jest.spyOn(core, "setOutput");
+    const restoreCacheMock = jest
+        .spyOn(cache, "restoreCache")
+        .mockImplementationOnce(() => {
+            return Promise.resolve(key);
+        });
+
+    await restoreImpl(new StateProvider());
+
+    expect(restoreCacheMock).toHaveBeenCalledTimes(1);
+    expect(restoreCacheMock).toHaveBeenCalledWith(
+        [path],
+        key,
+        [],
+        {
+            lookupOnly: false
+        },
+        false,
+        true
+    );
+
+    expect(stateMock).toHaveBeenCalledWith("CACHE_KEY", key);
+    expect(setCacheHitOutputMock).toHaveBeenCalledTimes(1);
+    expect(setCacheHitOutputMock).toHaveBeenCalledWith("cache-hit", "true");
+
+    expect(infoMock).toHaveBeenCalledWith(`Cache restored from key: ${key}`);
+    expect(failedMock).toHaveBeenCalledTimes(0);
+});
+
 test("restore failure with earlyExit should call process exit", async () => {
     testUtils.setInput(Inputs.Path, "node_modules");
     const failedMock = jest.spyOn(core, "setFailed");
