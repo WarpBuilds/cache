@@ -29,6 +29,11 @@ export function setInputs(input: CacheInput): void {
             Inputs.EnableCrossOsArchive,
             input.enableCrossOsArchive.toString()
         );
+    input.enableCrossArchArchive !== undefined &&
+        setInput(
+            Inputs.EnableCrossArchArchive,
+            input.enableCrossArchArchive.toString()
+        );
     input.failOnCacheMiss !== undefined &&
         setInput(Inputs.FailOnCacheMiss, input.failOnCacheMiss.toString());
     input.lookupOnly !== undefined &&
@@ -41,6 +46,7 @@ export function clearInputs(): void {
     delete process.env[getInputName(Inputs.RestoreKeys)];
     delete process.env[getInputName(Inputs.UploadChunkSize)];
     delete process.env[getInputName(Inputs.EnableCrossOsArchive)];
+    delete process.env[getInputName(Inputs.EnableCrossArchArchive)];
     delete process.env[getInputName(Inputs.FailOnCacheMiss)];
     delete process.env[getInputName(Inputs.LookupOnly)];
 }

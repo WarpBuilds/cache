@@ -42,6 +42,9 @@ Create a workflow `.yml` file in your repository's `.github/workflows` directory
 * `restore-keys` - An ordered multiline string listing the prefix-matched keys, that are used for restoring stale cache if no cache hit occurred for key.
 * `enableCrossOsArchive` - An optional boolean when enabled, allows Windows runners to save or restore caches that can be restored or saved respectively on other platforms. Default: `false`
 * `enableCrossArchArchive` - An optional boolean when enabled, allows runners to save or restore caches that can be restored or saved respectively on runners of other architectures. Default: `false`
+  
+  > **Note:** GitHub's `actions/cache` does not have this option and allows cross-architecture caching by default. In WarpCache, cross-architecture support requires explicitly setting `enableCrossArchArchive: true`.
+
 * `fail-on-cache-miss` - Fail the workflow if cache entry is not found. Default: `false`
 * `lookup-only` - If true, only checks if cache entry exists and skips download. Does not change save cache behavior. Default: `false`
 * `delete-cache` - If true, deletes the cache entry. Skips restore and save. Default: `false`

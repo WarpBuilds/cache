@@ -409,3 +409,43 @@ test("save with valid inputs uploads a cache", async () => {
 
     expect(failedMock).toHaveBeenCalledTimes(0);
 });
+
+test("save with enableCrossArchArchive uploads a cache", async () => {
+    const failedMock = jest.spyOn(core, "setFailed");
+
+    const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
+    const savedCacheKey = "Linux-node-";
+
+    jest.spyOn(core, "getState")
+        // Cache Entry State
+        .mockImplementationOnce(() => {
+            return savedCacheKey;
+        })
+        // Cache Key State
+        .mockImplementationOnce(() => {
+            return primaryKey;
+        });
+
+    const inputPath = "node_modules";
+    testUtils.setInput(Inputs.Path, inputPath);
+    testUtils.setInput(Inputs.EnableCrossArchArchive, "true");
+
+    const cacheId = "5";
+    const saveCacheMock = jest
+        .spyOn(cache, "saveCache")
+        .mockImplementationOnce(() => {
+            return Promise.resolve(cacheId);
+        });
+
+    await saveImpl(new StateProvider());
+
+    expect(saveCacheMock).toHaveBeenCalledTimes(1);
+    expect(saveCacheMock).toHaveBeenCalledWith(
+        [inputPath],
+        primaryKey,
+        false,
+        true
+    );
+
+    expect(failedMock).toHaveBeenCalledTimes(0);
+});

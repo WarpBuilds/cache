@@ -216,3 +216,66 @@ jobs:
         path: |
           test-cache
           ~/test-cache
+
+  # Test cross-architecture caching with save-only and restore-only
+  test-cross-arch-save-x64:
+    runs-on: warp-ubuntu-latest-x64-16x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Generate files
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} test-cache
+    - name: Save cache with enableCrossArchArchive
+      uses: ./save/
+      with:
+        key: test-cross-arch-${{ github.run_id }}
+        path: test-cache
+        enableCrossArchArchive: true
+
+  test-cross-arch-restore-arm64:
+    needs: test-cross-arch-save-x64
+    runs-on: warp-ubuntu-latest-arm64-16x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Restore cache with enableCrossArchArchive
+      uses: ./restore/
+      with:
+        key: test-cross-arch-${{ github.run_id }}
+        path: test-cache
+        enableCrossArchArchive: true
+    - name: Verify cache files
+      shell: bash
+      run: __tests__/verify-cache-files.sh ${{ runner.os }} test-cache
+
+  test-cross-arch-save-arm64:
+    runs-on: warp-ubuntu-latest-arm64-16x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Generate files
+      shell: bash
+      run: __tests__/create-cache-files.sh ${{ runner.os }} test-cache
+    - name: Save cache with enableCrossArchArchive
+      uses: ./save/
+      with:
+        key: test-cross-arch-reverse-${{ github.run_id }}
+        path: test-cache
+        enableCrossArchArchive: true
+
+  test-cross-arch-restore-x64:
+    needs: test-cross-arch-save-arm64
+    runs-on: warp-ubuntu-latest-x64-16x
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Restore cache with enableCrossArchArchive
+      uses: ./restore/
+      with:
+        key: test-cross-arch-reverse-${{ github.run_id }}
+        path: test-cache
+        enableCrossArchArchive: true
+    - name: Verify cache files
+      shell: bash
+      run: __tests__/verify-cache-files.sh ${{ runner.os }} test-cache
