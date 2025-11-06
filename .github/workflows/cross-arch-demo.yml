@@ -62,4 +62,18 @@ jobs:
         key: warp-cache-${{ github.run_id }}
     - name: Verify
       run: test -f test-data/arch.txt
+      
+  # WarpBuilds/cache - ARM64 with enableCrossArchArchive
+  warp-cache-arm64-cross-arch:
+    needs: warp-cache-x64
+    runs-on: warp-ubuntu-latest-arm64-4x
+    steps:
+    - name: Cache
+      uses: WarpBuilds/cache@v1
+      with:
+        path: test-data
+        key: warp-cache-${{ github.run_id }}
+        enableCrossArchArchive: true
+    - name: Verify
+      run: test -f test-data/arch.txt
 
