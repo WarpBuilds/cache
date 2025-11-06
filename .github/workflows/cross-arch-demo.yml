@@ -7,56 +7,56 @@ on:
      - ah-enable-cross-arch-archive
 
 jobs:
-  # GitHub actions/cache - Save on x64
-  github-cache-save-x64:
+  # GitHub actions/cache - x64
+  github-cache-x64:
     runs-on: ubuntu-latest
     steps:
+    - name: Cache
+      uses: actions/cache@v4
+      with:
+        path: test-data
+        key: github-cache-${{ github.run_id }}
     - name: Generate test files
       run: |
         mkdir -p test-data
         echo "$(uname -m)" > test-data/arch.txt
         dd if=/dev/urandom of=test-data/data.bin bs=1M count=5
-    - name: Save cache
-      uses: actions/cache/save@v4
-      with:
-        path: test-data
-        key: github-cache-${{ github.run_id }}
 
-  # GitHub actions/cache - Restore on ARM64
-  github-cache-restore-arm64:
-    needs: github-cache-save-x64
+  # GitHub actions/cache - ARM64
+  github-cache-arm64:
+    needs: github-cache-x64
     runs-on: ubuntu-24.04-arm
     steps:
-    - name: Restore cache
-      uses: actions/cache/restore@v4
+    - name: Cache
+      uses: actions/cache@v4
       with:
         path: test-data
         key: github-cache-${{ github.run_id }}
     - name: Verify
       run: test -f test-data/arch.txt
 
-  # WarpBuilds/cache - Save on x64
-  warp-cache-save-x64:
+  # WarpBuilds/cache - x64
+  warp-cache-x64:
     runs-on: warp-ubuntu-latest-x64-4x
     steps:
+    - name: Cache
+      uses: WarpBuilds/cache@v1
+      with:
+        path: test-data
+        key: warp-cache-${{ github.run_id }}
     - name: Generate test files
       run: |
         mkdir -p test-data
         echo "$(uname -m)" > test-data/arch.txt
         dd if=/dev/urandom of=test-data/data.bin bs=1M count=5
-    - name: Save cache
-      uses: WarpBuilds/cache/save@v1
-      with:
-        path: test-data
-        key: warp-cache-${{ github.run_id }}
 
-  # WarpBuilds/cache - Restore on ARM64
-  warp-cache-restore-arm64:
-    needs: warp-cache-save-x64
+  # WarpBuilds/cache - ARM64
+  warp-cache-arm64:
+    needs: warp-cache-x64
     runs-on: warp-ubuntu-latest-arm64-4x
     steps:
-    - name: Restore cache
-      uses: WarpBuilds/cache/restore@v1
+    - name: Cache
+      uses: WarpBuilds/cache@v1
       with:
         path: test-data
         key: warp-cache-${{ github.run_id }}
