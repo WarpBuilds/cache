@@ -63,7 +63,24 @@ jobs:
     - name: Verify
       run: test -f test-data/arch.txt
       
-  # WarpBuilds/cache - ARM64 with enableCrossArchArchive
+
+  # WarpBuilds/cache - x64
+  warp-cache-x64-cross-arch:
+    runs-on: warp-ubuntu-latest-x64-4x
+    steps:
+    - name: Cache
+      uses: WarpBuilds/cache@v1
+      with:
+        path: test-data
+        key: warp-cache-${{ github.run_id }}
+        enableCrossArchArchive: true
+    - name: Generate test files
+      run: |
+        mkdir -p test-data
+        echo "$(uname -m)" > test-data/arch.txt
+        dd if=/dev/urandom of=test-data/data.bin bs=1M count=5
+  
+  # WarpBuilds/cache - ARM64
   warp-cache-arm64-cross-arch:
     needs: warp-cache-x64
     runs-on: warp-ubuntu-latest-arm64-4x
