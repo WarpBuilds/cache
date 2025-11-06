@@ -82,7 +82,7 @@ jobs:
   
   # WarpBuilds/cache - ARM64
   warp-cache-arm64-cross-arch:
-    needs: warp-cache-x64
+    needs: warp-cache-x64-cross-arch
     runs-on: warp-ubuntu-latest-arm64-4x
     steps:
     - name: Cache
