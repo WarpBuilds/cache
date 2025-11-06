@@ -11,6 +11,8 @@ The restore action restores a cache. It works similarly to the `cache` action ex
 * `restore-keys` - An ordered list of prefix-matched keys to use for restoring stale cache if no cache hit occurred for key.
 * `enableCrossOsArchive` - An optional boolean when enabled, allows windows runners to restore caches that were saved on other platforms. Default: `false`
 * `enableCrossArchArchive` - An optional boolean when enabled, allows runners of different architectures to restore caches that were saved on other architectures. Default: `false`
+  > [!NOTE]
+  > GitHub's `actions/cache` does not have this option and allows cross-architecture caching by default. In WarpCache, cross-architecture support requires explicitly setting `enableCrossArchArchive: true`.
 * `fail-on-cache-miss` - Fail the workflow if cache entry is not found. Default: `false`
 * `lookup-only` - If true, only checks if cache entry exists and skips download. Default: `false`
 

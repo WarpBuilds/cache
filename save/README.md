@@ -11,6 +11,8 @@ The save action saves a cache. It works similarly to the `cache` action except t
 * `upload-chunk-size` - The chunk size used to split up large files during upload, in bytes
 * `enableCrossOsArchive` - An optional boolean when enabled, allows windows runners to save caches that can be restored on other platforms. Default: `false`
 * `enableCrossArchArchive` - An optional boolean when enabled, allows runners of different architectures to save caches that can be restored on other architectures. Default: `false`
+  > [!NOTE]
+  > GitHub's `actions/cache` does not have this option and allows cross-architecture caching by default. In WarpCache, cross-architecture support requires explicitly setting `enableCrossArchArchive: true`.
 
 ### Outputs
 
