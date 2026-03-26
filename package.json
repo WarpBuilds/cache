@@ -52,7 +52,6 @@
   },
   "overrides": {
     "undici": "^6.24.0",
-    "minimatch": "^9.0.7",
     "fast-xml-parser": "^5.5.7",
     "flatted": "^3.3.4",
     "axios": "^1.8.0",
