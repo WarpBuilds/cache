@@ -25,7 +25,7 @@ jobs:
     #   run: dd if=/dev/urandom of=temp/temp3/50MB bs=1M count=50
     - name: WarpCache
       if: matrix.os == 'warpdev-ubuntu-latest-x64-4x'
-      uses: WarpBuilds/cache@fix/dependabot-vulns
+      uses: WarpBuilds/cache@chore/upgrade-node24
       with:
         path: |
           temp/temp1
