@@ -1,6 +1,6 @@
 {
   "name": "warpcache",
-  "version": "1.4.6",
+  "version": "1.4.11",
   "private": true,
   "description": "Cache dependencies and build outputs",
   "main": "dist/restore/index.js",
