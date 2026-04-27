@@ -52,9 +52,8 @@
   },
   "overrides": {
     "undici": "^6.24.0",
-    "fast-xml-parser": "^5.5.7",
+    "fast-xml-parser": "^5.7.2",
     "flatted": "^3.3.4",
-    "axios": "^1.8.0",
     "jws": "^4.0.0",
     "@tootallnate/once": "^3.0.1"
   }
