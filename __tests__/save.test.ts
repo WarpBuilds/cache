@@ -93,7 +93,7 @@ test("save with valid inputs uploads a cache", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = "4";
+    const cacheId = 4;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -106,7 +106,7 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
+        { enableCrossArchArchive: false },
         false
     );
 

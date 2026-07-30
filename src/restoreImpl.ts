@@ -62,9 +62,8 @@ export async function restoreImpl(
             cachePaths,
             primaryKey,
             restoreKeys,
-            { lookupOnly: lookupOnly },
-            enableCrossOsArchive,
-            enableCrossArchArchive
+            { lookupOnly, enableCrossArchArchive },
+            enableCrossOsArchive
         );
 
         if (!cacheKey) {
