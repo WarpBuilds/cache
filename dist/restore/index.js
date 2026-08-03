@@ -63162,7 +63162,7 @@ function setCommandEcho(enabled) {
  */
 function setFailed(message) {
     process.exitCode = ExitCode.Failure;
-    error(message);
+    core_error(message);
 }
 //-----------------------------------------------------------------------
 // Logging Commands
@@ -63185,7 +63185,7 @@ function core_debug(message) {
  * @param message error issue message. Errors will be converted to string via toString()
  * @param properties optional properties to add to the annotation.
  */
-function error(message, properties = {}) {
+function core_error(message, properties = {}) {
     command_issueCommand('error', utils_toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 /**
@@ -135719,15 +135719,12 @@ function getCacheEntry(key, restoreKeys, paths, options) {
         const response = yield requestUtils_retryTypedResponse('getCacheEntry', () => cacheHttpClient_awaiter(this, void 0, void 0, function* () {
             return httpClient.postJson(getCacheApiUrl('cache/get'), getCacheRequest);
         }));
-        if (response.statusCode === 204) {
-            // TODO: List cache for primary key only if cache miss occurs
-            // if (core.isDebug()) {
-            //   await printCachesListForDiagnostics(keys[0], httpClient, version)
-            // }
+        if (response.statusCode === 204 || response.statusCode === 404) {
+            core_debug(`No cache entry for key '${key}' with version '${version}'`);
             return null;
         }
         if (!requestUtils_isSuccessStatusCode(response.statusCode)) {
-            throw new Error(`Cache service responded with ${response.statusCode}`);
+            throw new HttpClientError(`Cache service responded with ${response.statusCode}`, response.statusCode);
         }
         const cacheResult = response.result;
         core_debug(`Cache Result:`);
@@ -136473,6 +136470,7 @@ var cache_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _ar
 
 
 
+
 class ValidationError extends Error {
     constructor(message) {
         super(message);
@@ -136551,6 +136549,12 @@ function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
             archivePath = external_path_.join(yield createTempDirectory(), getCacheFileName(compressionMethod));
             core_debug(`Archive Path: ${archivePath}`);
             const cacheKey = (_c = (_b = cacheEntry === null || cacheEntry === void 0 ? void 0 : cacheEntry.cache_entry) === null || _b === void 0 ? void 0 : _b.cache_user_given_key) !== null && _c !== void 0 ? _c : primaryKey;
+            if (cacheKey !== primaryKey) {
+                info(`Cache hit for restore-key: ${cacheKey}`);
+            }
+            else {
+                info(`Cache hit for: ${cacheKey}`);
+            }
             switch (cacheEntry.provider) {
                 case 's3':
                 case 'r2': {
@@ -136669,7 +136673,15 @@ function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
             }
             else {
                 // Suppress all non-validation cache related errors because caching should be optional
-                warning(`Failed to restore: ${error.message}`);
+                // Log server errors (5xx) as errors, all other errors as warnings.
+                if (typedError instanceof HttpClientError &&
+                    typeof typedError.statusCode === 'number' &&
+                    typedError.statusCode >= 500) {
+                    core_error(`Failed to restore: ${error.message}`);
+                }
+                else {
+                    warning(`Failed to restore: ${error.message}`);
+                }
             }
         }
         finally {
@@ -136699,7 +136711,7 @@ function restoreCache(paths_1, primaryKey_1, restoreKeys_1, options_1) {
  */
 function cache_saveCache(paths_1, key_1, options_1) {
     return cache_awaiter(this, arguments, void 0, function* (paths, key, options, enableCrossOsArchive = false) {
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p, _q, _r, _s, _t, _u, _v, _w, _x, _y, _z, _0, _1, _2, _3;
         checkPaths(paths);
         checkKey(key);
         const enableCrossArchArchive = (_a = getUploadOptions(options).enableCrossArchArchive) !== null && _a !== void 0 ? _a : false;
@@ -136739,19 +136751,23 @@ function cache_saveCache(paths_1, key_1, options_1) {
                     numberOfChunks,
                     cacheVersion
                 })}`);
-                throw new Error((_d = (_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message) !== null && _d !== void 0 ? _d : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
+                if ((reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.statusCode) === 400 ||
+                    !((_c = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _c === void 0 ? void 0 : _c.message)) {
+                    throw new Error((_e = (_d = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.error) === null || _d === void 0 ? void 0 : _d.message) !== null && _e !== void 0 ? _e : `Cache size of ~${Math.round(archiveFileSize / (1024 * 1024))} MB (${archiveFileSize} B) is over the data cap limit, not saving cache.`);
+                }
+                throw new ReserveCacheError(reserveCacheResponse.error.message);
             }
-            switch ((_e = reserveCacheResponse.result) === null || _e === void 0 ? void 0 : _e.provider) {
+            switch ((_f = reserveCacheResponse.result) === null || _f === void 0 ? void 0 : _f.provider) {
                 case 's3':
                 case 'r2':
                     core.debug(`Saving Cache to S3`);
-                    cacheKey = yield cacheHttpClient.saveCache('s3', key, cacheVersion, archivePath, (_h = (_g = (_f = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _f === void 0 ? void 0 : _f.s3) === null || _g === void 0 ? void 0 : _g.upload_id) !== null && _h !== void 0 ? _h : '', (_l = (_k = (_j = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _j === void 0 ? void 0 : _j.s3) === null || _k === void 0 ? void 0 : _k.upload_key) !== null && _l !== void 0 ? _l : '', numberOfChunks, (_p = (_o = (_m = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _m === void 0 ? void 0 : _m.s3) === null || _o === void 0 ? void 0 : _o.pre_signed_urls) !== null && _p !== void 0 ? _p : []);
+                    cacheKey = yield cacheHttpClient.saveCache('s3', key, cacheVersion, archivePath, (_j = (_h = (_g = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _g === void 0 ? void 0 : _g.s3) === null || _h === void 0 ? void 0 : _h.upload_id) !== null && _j !== void 0 ? _j : '', (_m = (_l = (_k = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _k === void 0 ? void 0 : _k.s3) === null || _l === void 0 ? void 0 : _l.upload_key) !== null && _m !== void 0 ? _m : '', numberOfChunks, (_q = (_p = (_o = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _o === void 0 ? void 0 : _o.s3) === null || _p === void 0 ? void 0 : _p.pre_signed_urls) !== null && _q !== void 0 ? _q : []);
                     break;
                 case 'gcs':
                     core.debug(`Saving Cache to GCS`);
                     cacheKey = yield cacheHttpClient.saveCache('gcs', key, cacheVersion, archivePath, 
                     // S3 Params are undefined for GCS
-                    undefined, undefined, undefined, undefined, (_t = (_s = (_r = (_q = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _q === void 0 ? void 0 : _q.gcs) === null || _r === void 0 ? void 0 : _r.short_lived_token) === null || _s === void 0 ? void 0 : _s.access_token) !== null && _t !== void 0 ? _t : '', (_w = (_v = (_u = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _u === void 0 ? void 0 : _u.gcs) === null || _v === void 0 ? void 0 : _v.bucket_name) !== null && _w !== void 0 ? _w : '', (_z = (_y = (_x = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _x === void 0 ? void 0 : _x.gcs) === null || _y === void 0 ? void 0 : _y.cache_key) !== null && _z !== void 0 ? _z : '');
+                    undefined, undefined, undefined, undefined, (_u = (_t = (_s = (_r = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _r === void 0 ? void 0 : _r.gcs) === null || _s === void 0 ? void 0 : _s.short_lived_token) === null || _t === void 0 ? void 0 : _t.access_token) !== null && _u !== void 0 ? _u : '', (_x = (_w = (_v = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _v === void 0 ? void 0 : _v.gcs) === null || _w === void 0 ? void 0 : _w.bucket_name) !== null && _x !== void 0 ? _x : '', (_0 = (_z = (_y = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _y === void 0 ? void 0 : _y.gcs) === null || _z === void 0 ? void 0 : _z.cache_key) !== null && _0 !== void 0 ? _0 : '');
                     break;
                 case 'azure_blob':
                     core.debug(`Saving Cache to Azure Blob`);
@@ -136759,7 +136775,7 @@ function cache_saveCache(paths_1, key_1, options_1) {
                     // S3 Params are undefined for GCS
                     undefined, undefined, undefined, undefined, 
                     // GCS Params are undefined for Azure Blob
-                    undefined, undefined, undefined, (_2 = (_1 = (_0 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _0 === void 0 ? void 0 : _0.azure_blob) === null || _1 === void 0 ? void 0 : _1.pre_signed_url) !== null && _2 !== void 0 ? _2 : '');
+                    undefined, undefined, undefined, (_3 = (_2 = (_1 = reserveCacheResponse === null || reserveCacheResponse === void 0 ? void 0 : reserveCacheResponse.result) === null || _1 === void 0 ? void 0 : _1.azure_blob) === null || _2 === void 0 ? void 0 : _2.pre_signed_url) !== null && _3 !== void 0 ? _3 : '');
             }
         }
         catch (error) {
