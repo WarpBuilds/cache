@@ -15,7 +15,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-15-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -38,7 +38,7 @@ jobs:
   test-save:
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-15-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -61,7 +61,7 @@ jobs:
     needs: test-save
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-15-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -84,7 +84,7 @@ jobs:
   test-save-only:
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-15-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -108,7 +108,7 @@ jobs:
     needs: test-save-only
     strategy:
       matrix:
-        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-14-arm64-6x]
+        os: [warp-ubuntu-latest-x64-16x, warp-ubuntu-latest-arm64-16x, warp-macos-15-arm64-6x]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
