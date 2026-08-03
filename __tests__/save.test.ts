@@ -106,7 +106,10 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        { enableCrossArchArchive: false },
+        {
+            enableCrossArchArchive: false,
+            uploadChunkSize: 4000000
+        },
         false
     );
 

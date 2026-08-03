@@ -148929,7 +148929,7 @@ function getInputAsArray(name, options) {
         .filter(x => x !== "");
 }
 function getInputAsInt(name, options) {
-    const value = parseInt(core.getInput(name, options));
+    const value = parseInt(getInput(name, options));
     if (isNaN(value) || value < 0) {
         return undefined;
     }
@@ -148997,7 +148997,10 @@ async function saveImpl(stateProvider) {
         });
         const enableCrossOsArchive = getInputAsBool(Inputs.EnableCrossOsArchive);
         const enableCrossArchArchive = getInputAsBool(Inputs.EnableCrossArchArchive);
-        cacheId = await cache_saveCache(cachePaths, primaryKey, { enableCrossArchArchive }, enableCrossOsArchive);
+        cacheId = await cache_saveCache(cachePaths, primaryKey, {
+            enableCrossArchArchive,
+            uploadChunkSize: getInputAsInt(Inputs.UploadChunkSize)
+        }, enableCrossOsArchive);
         if (cacheId != -1) {
             info(`Cache saved with key: ${primaryKey}`);
         }
@@ -149011,7 +149014,7 @@ async function saveOnlyRun(earlyExit) {
     try {
         const cacheId = await saveImpl(new NullStateProvider());
         if (cacheId === -1) {
-            core.warning(`Cache save failed.`);
+            core.debug(`Cache was not saved.`);
         }
     }
     catch (err) {

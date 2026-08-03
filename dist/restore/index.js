@@ -60349,21 +60349,6 @@ __nccwpck_require__.d(mappers_namespaceObject, {
   UserDelegationKey: () => (UserDelegationKey)
 });
 
-// NAMESPACE OBJECT: ./src/utils/actionUtils.ts
-var actionUtils_namespaceObject = {};
-__nccwpck_require__.r(actionUtils_namespaceObject);
-__nccwpck_require__.d(actionUtils_namespaceObject, {
-  getInputAsArray: () => (getInputAsArray),
-  getInputAsBool: () => (getInputAsBool),
-  getInputAsInt: () => (getInputAsInt),
-  isCacheFeatureAvailable: () => (isCacheFeatureAvailable),
-  isExactKeyMatch: () => (actionUtils_isExactKeyMatch),
-  isGhes: () => (actionUtils_isGhes),
-  isKeyInCacheKey: () => (isKeyInCacheKey),
-  isValidEvent: () => (isValidEvent),
-  logWarning: () => (logWarning)
-});
-
 // EXTERNAL MODULE: external "os"
 var external_os_ = __nccwpck_require__(857);
 ;// CONCATENATED MODULE: ./node_modules/@actions/core/lib/utils.js
@@ -136925,7 +136910,7 @@ function getInputAsArray(name, options) {
         .filter(x => x !== "");
 }
 function getInputAsInt(name, options) {
-    const value = parseInt(getInput(name, options));
+    const value = parseInt(core.getInput(name, options));
     if (isNaN(value) || value < 0) {
         return undefined;
     }
@@ -136997,7 +136982,6 @@ async function restoreImpl(stateProvider, earlyExit) {
         // Store the matched cache key in states
         stateProvider.setState(constants_State.CacheMatchedKey, cacheKey);
         // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
-        console.log(actionUtils_namespaceObject);
         const isExactKeyMatch = actionUtils_isExactKeyMatch(getInput(Inputs.Key, { required: true }), cacheKey);
         setOutput(constants_Outputs.CacheHit, isExactKeyMatch.toString());
         if (lookupOnly) {

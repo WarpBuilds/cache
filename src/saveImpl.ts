@@ -76,7 +76,10 @@ export async function saveImpl(
         cacheId = await cache.saveCache(
             cachePaths,
             primaryKey,
-            { enableCrossArchArchive },
+            {
+                enableCrossArchArchive,
+                uploadChunkSize: utils.getInputAsInt(Inputs.UploadChunkSize)
+            },
             enableCrossOsArchive
         );
 
@@ -95,7 +98,7 @@ export async function saveOnlyRun(
     try {
         const cacheId = await saveImpl(new NullStateProvider());
         if (cacheId === -1) {
-            core.warning(`Cache save failed.`);
+            core.debug(`Cache was not saved.`);
         }
     } catch (err) {
         console.error(err);
