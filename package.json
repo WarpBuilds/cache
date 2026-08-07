@@ -1,6 +1,6 @@
 {
   "name": "warpcache",
-  "version": "1.4.13",
+  "version": "2.0.0",
   "private": true,
   "description": "Cache dependencies and build outputs",
   "type": "module",
@@ -26,7 +26,7 @@
   "author": "WarpBuild",
   "license": "MIT",
   "dependencies": {
-    "@actions/cache": "npm:@warpbuilds/cache@2.0.0-1",
+    "@actions/cache": "npm:@warpbuilds/cache@^2.0.0",
     "@actions/core": "^3.0.1",
     "@actions/exec": "^3.0.0",
     "@actions/io": "^3.0.2"
