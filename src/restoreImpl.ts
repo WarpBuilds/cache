@@ -62,9 +62,8 @@ export async function restoreImpl(
             cachePaths,
             primaryKey,
             restoreKeys,
-            { lookupOnly: lookupOnly },
-            enableCrossOsArchive,
-            enableCrossArchArchive
+            { lookupOnly, enableCrossArchArchive },
+            enableCrossOsArchive
         );
 
         if (!cacheKey) {
@@ -89,7 +88,6 @@ export async function restoreImpl(
         stateProvider.setState(State.CacheMatchedKey, cacheKey);
 
         // Cache key that we get from restoreCache is not exact match of requested cache key. It has repo and owner details prepended.
-        console.log(utils);
         const isExactKeyMatch = utils.isExactKeyMatch(
             core.getInput(Inputs.Key, { required: true }),
             cacheKey

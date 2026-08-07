@@ -87,9 +87,9 @@ test("restore with no cache found", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -130,9 +130,9 @@ test("restore with restore keys and no cache found", async () => {
         key,
         [restoreKey],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -170,9 +170,9 @@ test("restore with cache found for key", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -214,9 +214,9 @@ test("restore with cache found for restore key", async () => {
         key,
         [restoreKey],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
