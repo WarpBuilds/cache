@@ -83,7 +83,7 @@ test("save with valid inputs uploads a cache", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = "4";
+    const cacheId = 4;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -96,14 +96,18 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
+        {
+            enableCrossArchArchive: false,
+            uploadChunkSize: 4000000
+        },
         false
     );
 
     expect(failedMock).toHaveBeenCalledTimes(0);
 });
 
-test("save failing logs the warning message", async () => {
+test("save failing logs the debug message", async () => {
+    const debugMock = jest.spyOn(core, "debug");
     const warningMock = jest.spyOn(core, "warning");
 
     const primaryKey = "Linux-node-bb828da54c148048dd17899ba9fda624811cfb43";
@@ -113,7 +117,7 @@ test("save failing logs the warning message", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = "";
+    const cacheId = -1;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -126,10 +130,13 @@ test("save failing logs the warning message", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
+        {
+            enableCrossArchArchive: false,
+            uploadChunkSize: 4000000
+        },
         false
     );
 
-    expect(warningMock).toHaveBeenCalledTimes(1);
-    expect(warningMock).toHaveBeenCalledWith("Cache save failed.");
+    expect(debugMock).toHaveBeenCalledWith("Cache was not saved.");
+    expect(warningMock).not.toHaveBeenCalled();
 });

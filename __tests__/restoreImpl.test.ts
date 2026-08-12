@@ -135,9 +135,9 @@ test("restore on GHES with AC available ", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -190,9 +190,9 @@ test("restore with too many keys should fail", async () => {
         key,
         restoreKeys,
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -217,9 +217,9 @@ test("restore with large key should fail", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -244,9 +244,9 @@ test("restore with invalid key should fail", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
     expect(failedMock).toHaveBeenCalledWith(
@@ -280,9 +280,9 @@ test("restore with no cache found", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -322,9 +322,9 @@ test("restore with restore keys and no cache found", async () => {
         key,
         [restoreKey],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -363,9 +363,9 @@ test("restore with cache found for key", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -406,9 +406,9 @@ test("restore with cache found for restore key", async () => {
         key,
         [restoreKey],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -448,9 +448,9 @@ test("restore with lookup-only set", async () => {
         key,
         [],
         {
-            lookupOnly: true
+            lookupOnly: true,
+            enableCrossArchArchive: false
         },
-        false,
         false
     );
 
@@ -494,10 +494,10 @@ test("restore with enableCrossArchArchive set", async () => {
         key,
         [],
         {
-            lookupOnly: false
+            lookupOnly: false,
+            enableCrossArchArchive: true
         },
-        false,
-        true
+        false
     );
 
     expect(stateMock).toHaveBeenCalledWith("CACHE_KEY", key);

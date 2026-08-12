@@ -161,7 +161,7 @@ test("save on GHES with AC available", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = "4";
+    const cacheId = 4;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -174,7 +174,10 @@ test("save on GHES with AC available", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
+        {
+            enableCrossArchArchive: false,
+            uploadChunkSize: 4000000
+        },
         false
     );
 
@@ -390,7 +393,7 @@ test("save with valid inputs uploads a cache", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.UploadChunkSize, "4000000");
 
-    const cacheId = "4";
+    const cacheId = 4;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -403,7 +406,10 @@ test("save with valid inputs uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
+        {
+            enableCrossArchArchive: false,
+            uploadChunkSize: 4000000
+        },
         false
     );
 
@@ -430,7 +436,7 @@ test("save with enableCrossArchArchive uploads a cache", async () => {
     testUtils.setInput(Inputs.Path, inputPath);
     testUtils.setInput(Inputs.EnableCrossArchArchive, "true");
 
-    const cacheId = "5";
+    const cacheId = 5;
     const saveCacheMock = jest
         .spyOn(cache, "saveCache")
         .mockImplementationOnce(() => {
@@ -443,8 +449,8 @@ test("save with enableCrossArchArchive uploads a cache", async () => {
     expect(saveCacheMock).toHaveBeenCalledWith(
         [inputPath],
         primaryKey,
-        false,
-        true
+        { enableCrossArchArchive: true },
+        false
     );
 
     expect(failedMock).toHaveBeenCalledTimes(0);
