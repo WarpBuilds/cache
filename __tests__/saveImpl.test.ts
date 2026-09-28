@@ -89,6 +89,11 @@ test("save with no primary key in state outputs warning", async () => {
 
     expect(cache.saveCache).toHaveBeenCalledTimes(0);
     expect(core.info).toHaveBeenCalledWith(`[warning]Key is not specified.`);
+    expect(
+        (core.info as jest.Mock).mock.calls.filter(call =>
+            String(call[0]).startsWith("[warning]")
+        )
+    ).toHaveLength(1);
     expect(core.setFailed).toHaveBeenCalledTimes(0);
 });
 
@@ -177,6 +182,11 @@ test("save with missing input outputs warning", async () => {
     expect(core.info).toHaveBeenCalledWith(
         "[warning]Input required and not supplied: path"
     );
+    expect(
+        (core.info as jest.Mock).mock.calls.filter(call =>
+            String(call[0]).startsWith("[warning]")
+        )
+    ).toHaveLength(1);
     expect(core.setFailed).toHaveBeenCalledTimes(0);
 });
 
@@ -200,6 +210,18 @@ test("save with large cache outputs warning", async () => {
     await saveImpl(new StateProvider());
 
     expect(cache.saveCache).toHaveBeenCalledTimes(1);
+    expect(cache.saveCache).toHaveBeenCalledWith(
+        [inputPath],
+        primaryKey,
+        expect.anything(),
+        false
+    );
+
+    expect(
+        (core.info as jest.Mock).mock.calls.filter(call =>
+            String(call[0]).startsWith("[warning]")
+        )
+    ).toHaveLength(1);
     expect(core.info).toHaveBeenCalledWith(
         "[warning]Cache size of ~6144 MB (6442450944 B) is over the 5GB limit, not saving cache."
     );
@@ -226,9 +248,21 @@ test("save with reserve cache failure outputs warning", async () => {
     await saveImpl(new StateProvider());
 
     expect(cache.saveCache).toHaveBeenCalledTimes(1);
+    expect(cache.saveCache).toHaveBeenCalledWith(
+        [inputPath],
+        primaryKey,
+        expect.anything(),
+        false
+    );
+
     expect(core.info).toHaveBeenCalledWith(
         `[warning]Unable to reserve cache with key ${primaryKey}, another job may be creating this cache.`
     );
+    expect(
+        (core.info as jest.Mock).mock.calls.filter(call =>
+            String(call[0]).startsWith("[warning]")
+        )
+    ).toHaveLength(1);
     expect(core.setFailed).toHaveBeenCalledTimes(0);
 });
 
@@ -250,6 +284,18 @@ test("save with server error outputs warning", async () => {
     await saveImpl(new StateProvider());
 
     expect(cache.saveCache).toHaveBeenCalledTimes(1);
+    expect(cache.saveCache).toHaveBeenCalledWith(
+        [inputPath],
+        primaryKey,
+        expect.anything(),
+        false
+    );
+
+    expect(
+        (core.info as jest.Mock).mock.calls.filter(call =>
+            String(call[0]).startsWith("[warning]")
+        )
+    ).toHaveLength(1);
     expect(core.info).toHaveBeenCalledWith("[warning]HTTP Error Occurred");
     expect(core.setFailed).toHaveBeenCalledTimes(0);
 });
