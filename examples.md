@@ -49,7 +49,7 @@
   with:
     path: |
       ~/.bun/install/cache
-    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
 ```
 
 ### Windows
@@ -59,7 +59,7 @@
   with:
     path: |
       ~\.bun
-    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+    key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
 ```
 
 ## C# - NuGet
@@ -552,7 +552,7 @@ jobs:
 - name: Set up Python
   # The WarpBuilds/cache step below uses this id to get the exact python version
   id: setup-python
-  uses: actions/setup-python@v2
+  uses: actions/setup-python@v6
 
   ⋮
 

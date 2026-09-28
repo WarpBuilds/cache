@@ -81,7 +81,7 @@ jobs:
     runs-on: warp-ubuntu-latest-x64-4x
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Cache Primes
       id: cache-primes
@@ -112,7 +112,7 @@ jobs:
     runs-on: warp-ubuntu-latest-x64-4x
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
 
     - name: Restore cached Primes
       id: cache-primes-restore
@@ -220,7 +220,7 @@ Example:
 
 ```yaml
 steps:
-  - uses: actions/checkout@v4
+  - uses: actions/checkout@v6
 
   - uses: WarpBuilds/cache@v1
     id: cache
@@ -250,7 +250,7 @@ jobs:
   build-linux:
     runs-on: warp-ubuntu-latest-x64-4x
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache Primes
         id: cache-primes
@@ -277,7 +277,7 @@ jobs:
   build-mac:
     runs-on: warp-macos-14-arm64-6x
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Cache Primes
         id: cache-primes
@@ -325,7 +325,7 @@ Please note that Windows environment variables (like `%LocalAppData%`) will NOT 
 
 ## Note
 
-Thank you for your interest in this GitHub repo, however, right now we are not taking contributions. 
+Thank you for your interest in this GitHub repo, however, right now we are not taking contributions.
 
 We continue to focus our resources on strategic areas that help our customers be successful while making developers' lives easier. While GitHub Actions remains a key part of this vision, we are allocating resources towards other areas of Actions and are not taking contributions to this repository at this time. The GitHub public roadmap is the best place to follow along for any updates on features we’re working on and what stage they’re in.
 

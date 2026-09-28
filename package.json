@@ -7,7 +7,7 @@
   "main": "dist/restore/index.js",
   "scripts": {
     "build": "tsc && ncc build -o dist/restore src/restore.ts && ncc build -o dist/save src/save.ts && ncc build -o dist/restore-only src/restoreOnly.ts && ncc build -o dist/save-only src/saveOnly.ts",
-    "test": "tsc --noEmit && jest --coverage",
+    "test": "tsc --noEmit && node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
     "lint": "eslint **/*.ts --cache",
     "format": "prettier --write **/*.ts",
     "format-check": "prettier --check **/*.ts"
@@ -50,6 +50,9 @@
     "ts-jest": "^29.4.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
+  },
+  "engines": {
+    "node": ">=24"
   },
   "overrides": {
     "undici": "^6.24.0",
